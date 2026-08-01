@@ -1,0 +1,217 @@
+openapi: 3.1.0
+info:
+  title: Go Ticket API
+  version: 1.0.0
+servers:
+  - url: https://api.gotick.example/v1
+    description: Production Server
+  - url: https://test.api.gotick.example/v1
+    description: Test Server
+  - url: http://127.0.0.1:8080/v1
+    description: Local Server
+security:
+  - bearerAuth: []
+tags:
+  - name: Public Events
+    x-displayName: Events
+    description: Published events browsable without authentication.
+  - name: Public Occurrences
+    x-displayName: Occurrences
+    description: Scheduled showings of a published event.
+  - name: Public Ticket Categories
+    x-displayName: Ticket Categories
+    description: Ticket types on sale for an occurrence.
+  - name: Public Sale Phases
+    x-displayName: Sale Phases
+    description: Selling windows that gate an occurrence's ticket sales.
+  - name: Public Organizers
+    x-displayName: Organizers
+    description: Public profiles of the organizers running events.
+  - name: Public Cities
+    x-displayName: Cities
+    description: Reference list of cities events can be held in.
+  - name: Public Categories
+    x-displayName: Categories
+    description: Reference list of categories events are classified under.
+
+  - name: My Profile
+    x-displayName: Profile
+    description: The authenticated account's own profile.
+  - name: My Tickets
+    x-displayName: Tickets
+    description: Tickets owned by the authenticated account.
+  - name: My Orders
+    x-displayName: Orders
+    description: Orders placed by the authenticated account.
+  - name: My Organizer Applications
+    x-displayName: Organizer Applications
+    description: The authenticated account's requests to become an organizer.
+
+  - name: Organizer Events
+    x-displayName: Events
+    description: Events managed by the caller's organizer, including publishing.
+  - name: Organizer Occurrences
+    x-displayName: Occurrences
+    description: Scheduling and rescheduling of an event's occurrences.
+  - name: Organizer Ticket Categories
+    x-displayName: Ticket Categories
+    description: Ticket types and pricing for an occurrence.
+  - name: Organizer Sale Phases
+    x-displayName: Sale Phases
+    description: Selling windows and their lifecycle transitions.
+
+  - name: Admin Organizer Applications
+    x-displayName: Organizer Applications
+    description: Review queue for accounts applying to become organizers.
+  - name: Admin Organizers
+    x-displayName: Organizers
+    description: Oversight of organizer accounts on the platform.
+  - name: Admin Cities
+    x-displayName: Cities
+    description: Maintenance of the city reference data.
+  - name: Admin Categories
+    x-displayName: Categories
+    description: Maintenance of the category reference data.
+x-tagGroups:
+  - name: Public
+    tags:
+      - Public Events
+      - Public Occurrences
+      - Public Ticket Categories
+      - Public Sale Phases
+      - Public Organizers
+      - Public Cities
+      - Public Categories
+  - name: Me
+    tags:
+      - My Profile
+      - My Tickets
+      - My Orders
+      - My Organizer Applications
+  - name: Organizer
+    tags:
+      - Organizer Events
+      - Organizer Occurrences
+      - Organizer Ticket Categories
+      - Organizer Sale Phases
+  - name: Admin
+    tags:
+      - Admin Organizer Applications
+      - Admin Organizers
+      - Admin Cities
+      - Admin Categories
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+paths:
+  # Public
+  /public/cities:
+    $ref: ./paths/public_cities.yaml
+  /public/categories:
+    $ref: ./paths/public_categories.yaml
+  /public/organizers:
+    $ref: ./paths/public_organizers.yaml
+  /public/organizers/{organizerSlug}:
+    $ref: ./paths/public_organizers_{organizerSlug}.yaml
+  /public/events:
+    $ref: ./paths/public_events.yaml
+  /public/events/featured:
+    $ref: ./paths/public_events_featured.yaml
+  /public/events/upcoming:
+    $ref: ./paths/public_events_upcoming.yaml
+  /public/events/{eventSlug}:
+    $ref: ./paths/public_events_{eventSlug}.yaml
+  /public/events/{eventSlug}/occurrences:
+    $ref: ./paths/public_events_{eventSlug}_occurrences.yaml
+  /public/events/{eventSlug}/related:
+    $ref: ./paths/public_events_{eventSlug}_related.yaml
+  /public/occurrences/{occurrenceId}/ticket-categories:
+    $ref: ./paths/public_occurrences_{occurrenceId}_ticket-categories.yaml
+  /public/occurrences/{occurrenceId}/sale-phases:
+    $ref: ./paths/public_occurrences_{occurrenceId}_sale-phases.yaml
+  # Me (authenticated account)
+  /me/profile:
+    $ref: ./paths/me_profile.yaml
+  /me/tickets:
+    $ref: ./paths/me_tickets.yaml
+  /me/tickets/{ticketId}:
+    $ref: ./paths/me_tickets_{ticketId}.yaml
+  /me/orders:
+    $ref: ./paths/me_orders.yaml
+  /me/orders/{orderId}:
+    $ref: ./paths/me_orders_{orderId}.yaml
+  /me/organizer-applications:
+    $ref: ./paths/me_organizer-applications.yaml
+  /me/organizer-applications/{organizerApplicationId}:
+    $ref: ./paths/me_organizer-applications_{organizerApplicationId}.yaml
+  /me/organizer-applications/{organizerApplicationId}/resubmit:
+    $ref: ./paths/me_organizer-applications_{organizerApplicationId}_resubmit.yaml
+  # Organizer
+  /org/events:
+    $ref: ./paths/org_events.yaml
+  /org/events/{eventId}:
+    $ref: ./paths/org_events_{eventId}.yaml
+  /org/events/{eventId}/publish:
+    $ref: ./paths/org_events_{eventId}_publish.yaml
+  /org/events/{eventId}/close:
+    $ref: ./paths/org_events_{eventId}_close.yaml
+  /org/events/{eventId}/occurrences:
+    $ref: ./paths/org_events_{eventId}_occurrences.yaml
+  /org/events/{eventId}/occurrences/{occurrenceId}:
+    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}.yaml
+  /org/events/{eventId}/occurrences/{occurrenceId}/cancel:
+    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}_cancel.yaml
+  /org/events/{eventId}/occurrences/{occurrenceId}/postpone:
+    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}_postpone.yaml
+  /org/events/{eventId}/occurrences/{occurrenceId}/reschedule:
+    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}_reschedule.yaml
+  /org/occurrences/{occurrenceId}/ticket-categories:
+    $ref: ./paths/org_occurrences_{occurrenceId}_ticket-categories.yaml
+  /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}:
+    $ref: ./paths/org_occurrences_{occurrenceId}_ticket-categories_{ticketCategoryId}.yaml
+  /org/occurrences/{occurrenceId}/sale-phases:
+    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases.yaml
+  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}:
+    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}.yaml
+  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start:
+    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_start.yaml
+  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend:
+    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_suspend.yaml
+  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end:
+    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_end.yaml
+  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel:
+    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_cancel.yaml
+  # Admin
+  /admin/organizer-applications:
+    $ref: ./paths/admin_organizer-applications.yaml
+  /admin/organizer-applications/{organizerApplicationId}/approve:
+    $ref: ./paths/admin_organizer-applications_{organizerApplicationId}_approve.yaml
+  /admin/organizer-applications/{organizerApplicationId}/request-changes:
+    $ref: ./paths/admin_organizer-applications_{organizerApplicationId}_request-changes.yaml
+  /admin/organizer-applications/{organizerApplicationId}/reject:
+    $ref: ./paths/admin_organizer-applications_{organizerApplicationId}_reject.yaml
+  /admin/organizers:
+    $ref: ./paths/admin_organizers.yaml
+  /admin/organizers/{organizerId}/suspend:
+    $ref: ./paths/admin_organizers_{organizerId}_suspend.yaml
+  /admin/organizers/{organizerId}/activate:
+    $ref: ./paths/admin_organizers_{organizerId}_activate.yaml
+  /admin/cities:
+    $ref: ./paths/admin_cities.yaml
+  /admin/cities/{cityCode}:
+    $ref: ./paths/admin_cities_{cityCode}.yaml
+  /admin/cities/{cityCode}/deactivate:
+    $ref: ./paths/admin_cities_{cityCode}_deactivate.yaml
+  /admin/cities/{cityCode}/activate:
+    $ref: ./paths/admin_cities_{cityCode}_activate.yaml
+  /admin/categories:
+    $ref: ./paths/admin_categories.yaml
+  /admin/categories/{categoryId}:
+    $ref: ./paths/admin_categories_{categoryId}.yaml
+  /admin/categories/{categoryId}/deactivate:
+    $ref: ./paths/admin_categories_{categoryId}_deactivate.yaml
+  /admin/categories/{categoryId}/activate:
+    $ref: ./paths/admin_categories_{categoryId}_activate.yaml

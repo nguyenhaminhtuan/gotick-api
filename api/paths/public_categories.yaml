@@ -1,0 +1,18 @@
+get:
+  tags:
+    - Public Categories
+  operationId: listPublicCategories
+  x-ogen-operation-group: Categories
+  summary: List categories
+  security: []
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PublicCategoryList.yaml
+    '429':
+      $ref: ../components/responses/TooManyRequests.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

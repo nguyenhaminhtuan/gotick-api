@@ -1,0 +1,28 @@
+.env
+.env.*
+
+# Version control and editor state
+.git
+.gitignore
+.github
+.vscode
+.DS_Store
+**/.DS_Store
+
+# Local build and run artifacts
+bin
+tmp
+
+# Local orchestration and tooling; none of it is read by go build
+Makefile
+compose.yaml
+firebase.json
+docker
+scripts
+.air.toml
+.ogen.yml
+.squawk.toml
+sqlc.yaml
+
+# Docs
+*.md

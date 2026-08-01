@@ -1,0 +1,29 @@
+post:
+  tags:
+    - Admin Organizers
+  operationId: activateAdminOrganizer
+  x-ogen-operation-group: Organizers
+  summary: Activate an organizer
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: organizerId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Organizer.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

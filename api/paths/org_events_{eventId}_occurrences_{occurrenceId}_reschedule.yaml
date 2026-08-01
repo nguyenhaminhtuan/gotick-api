@@ -1,0 +1,32 @@
+post:
+  tags:
+    - Organizer Occurrences
+  operationId: rescheduleOrgOccurrence
+  x-ogen-operation-group: Occurrences
+  summary: Reschedule an occurrence
+  parameters:
+    - name: eventId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - name: occurrenceId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Occurrence.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

@@ -1,0 +1,60 @@
+get:
+  tags:
+    - Admin Categories
+  operationId: getAdminCategory
+  x-ogen-operation-group: Categories
+  summary: Get a category
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Category.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+patch:
+  tags:
+    - Admin Categories
+  operationId: updateAdminCategory
+  x-ogen-operation-group: Categories
+  summary: Update a category
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Category.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

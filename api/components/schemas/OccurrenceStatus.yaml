@@ -1,0 +1,7 @@
+type: string
+enum:
+  - scheduled
+  - on_going
+  - ended
+  - canceled
+  - postponed

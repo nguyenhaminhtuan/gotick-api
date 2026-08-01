@@ -1,0 +1,8 @@
+description: Conflict - the request conflicts with the current state of the resource.
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/Error.yaml
+    example:
+      error: Conflict
+      message: The request conflicts with the current state of the resource.

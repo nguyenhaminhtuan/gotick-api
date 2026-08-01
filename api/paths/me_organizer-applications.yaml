@@ -1,0 +1,45 @@
+get:
+  tags:
+    - My Organizer Applications
+  operationId: listMyOrganizerApplications
+  x-ogen-operation-group: OrganizerApplications
+  summary: List my organizer applications
+  security:
+    - bearerAuth: []
+  parameters:
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyOrganizerApplicationList.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - My Organizer Applications
+  operationId: createMyOrganizerApplication
+  x-ogen-operation-group: OrganizerApplications
+  summary: Submit an organizer application
+  security:
+    - bearerAuth: []
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyOrganizerApplication.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

@@ -1,0 +1,29 @@
+post:
+  tags:
+    - Admin Cities
+  operationId: deactivateAdminCity
+  x-ogen-operation-group: Cities
+  summary: Deactivate a city
+  security:
+    - bearerAuth: []
+  parameters:
+    - name: cityCode
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/Slug.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/City.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

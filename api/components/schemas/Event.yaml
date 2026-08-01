@@ -1,0 +1,41 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  slug:
+    $ref: ./Slug.yaml
+  description:
+    type: string
+  image:
+    type: string
+  status:
+    $ref: ./EventStatus.yaml
+  isListed:
+    type: boolean
+  isFeatured:
+    type: boolean
+  publishedAt:
+    type: string
+    format: date-time
+  closedAt:
+    type: string
+    format: date-time
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - name
+  - slug
+  - description
+  - image
+  - status
+  - isListed
+  - isFeatured
+  - createdAt
+  - updatedAt

@@ -1,0 +1,46 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  description:
+    type: string
+  organizerType:
+    $ref: ./OrganizerType.yaml
+  logo:
+    type: string
+  email:
+    type: string
+    format: email
+  phone:
+    type: string
+  publicContact:
+    type: object
+    additionalProperties: true
+  status:
+    $ref: ./OrganizerStatus.yaml
+  activatedAt:
+    type: string
+    format: date-time
+  suspendedAt:
+    type: string
+    format: date-time
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - name
+  - description
+  - organizerType
+  - logo
+  - email
+  - phone
+  - publicContact
+  - status
+  - createdAt
+  - updatedAt

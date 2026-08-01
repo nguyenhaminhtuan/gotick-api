@@ -1,0 +1,19 @@
+get:
+  tags:
+    - My Profile
+  operationId: getMyProfile
+  x-ogen-operation-group: Profile
+  summary: Get my profile
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyProfile.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

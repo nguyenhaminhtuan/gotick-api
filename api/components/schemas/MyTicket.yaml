@@ -1,0 +1,19 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  qrCode:
+    type: string
+  status:
+    $ref: ./TicketStatus.yaml
+  issuedAt:
+    type: string
+    format: date-time
+  usedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - qrCode
+  - status
+  - issuedAt

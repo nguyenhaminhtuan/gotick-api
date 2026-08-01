@@ -1,0 +1,27 @@
+post:
+  tags:
+    - Organizer Events
+  operationId: publishOrgEvent
+  x-ogen-operation-group: Events
+  summary: Publish an event
+  parameters:
+    - name: eventId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Event.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

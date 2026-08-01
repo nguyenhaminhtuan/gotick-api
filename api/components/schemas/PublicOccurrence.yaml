@@ -1,0 +1,29 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  startTime:
+    type: string
+    format: date-time
+  endTime:
+    type: string
+    format: date-time
+  venueName:
+    type: string
+  venueAddress:
+    type: string
+  status:
+    $ref: ./OccurrenceStatus.yaml
+  waitingRoomEnabled:
+    type: boolean
+required:
+  - id
+  - name
+  - startTime
+  - endTime
+  - venueName
+  - venueAddress
+  - status
+  - waitingRoomEnabled

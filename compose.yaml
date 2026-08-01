@@ -1,0 +1,81 @@
+services:
+  postgres:
+    image: postgres:18.4
+    restart: unless-stopped
+    ports:
+      - ${DB_PORT:-5432}:5432
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: [CMD-SHELL, "sh -c 'pg_isready -U ${DB_USER} -d ${DB_NAME}'"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    env_file:
+      - .env
+  
+  migrate:
+    image: ghcr.io/amacneil/dbmate:2
+    command: up
+    volumes:
+      - ./db/migrations:/db/migrations:ro
+      - ./db/schema.sql:/db/schema.sql
+    environment:
+      - DATABASE_URL=postgres://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT:-5432}/${DB_NAME}?sslmode=disable
+    env_file:
+      - .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  auth:
+    init: true
+    build:
+      dockerfile_inline: |
+        FROM node:24-alpine
+        RUN apk add --no-cache openjdk17-jre-headless bash
+        WORKDIR /app
+        RUN npm install -g firebase-tools@15.24
+        CMD firebase emulators:start --project $GOOGLE_CLOUD_PROJECT --import=/app/data/emulators --export-on-exit=/app/data/emulators
+    restart: unless-stopped
+    ports:
+      - "9099:9099" # Auth
+      - "4000:4000" # Emulator UI
+    volumes:
+      - ./firebase.json:/app/firebase.json:ro
+      - firebase_emulators_data:/app/data
+    environment:
+      - GOOGLE_CLOUD_PROJECT=demo-local-project
+
+  openapi-bundle:
+    image: redocly/cli:2.39.0
+    command: bundle
+    volumes:
+      - ./redocly.yaml:/spec/redocly.yaml:ro
+      - ./api:/spec/api:ro
+      - ./api/dist:/spec/api/dist
+    develop:
+      watch:
+        - path: ./api
+          action: restart
+          ignore:
+            - dist/
+
+  api-docs:
+    image: scalarapi/api-reference:0.5.58
+    restart: unless-stopped
+    ports:
+      - ${API_DOCS_PORT:-8081}:8080
+    volumes:
+      - ./api/dist:/docs:ro
+    depends_on:
+      openapi-bundle:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  firebase_emulators_data:

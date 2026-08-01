@@ -1,0 +1,13 @@
+allOf:
+  - $ref: ./PublicEvent.yaml
+  - type: object
+    properties:
+      organizer:
+        $ref: ./PublicOrganizer.yaml
+      occurrences:
+        type: array
+        items:
+          $ref: ./PublicOccurrence.yaml
+    required:
+      - organizer
+      - occurrences

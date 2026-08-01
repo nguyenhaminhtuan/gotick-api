@@ -1,0 +1,66 @@
+get:
+  tags:
+    - Organizer Ticket Categories
+  operationId: getOrgTicketCategory
+  x-ogen-operation-group: TicketCategories
+  summary: Get a ticket category
+  parameters:
+    - name: occurrenceId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - name: ticketCategoryId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/TicketCategory.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+patch:
+  tags:
+    - Organizer Ticket Categories
+  operationId: updateOrgTicketCategory
+  x-ogen-operation-group: TicketCategories
+  summary: Update a ticket category
+  parameters:
+    - name: occurrenceId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - name: ticketCategoryId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/TicketCategory.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

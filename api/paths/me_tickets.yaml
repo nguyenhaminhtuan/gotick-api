@@ -1,0 +1,24 @@
+get:
+  tags:
+    - My Tickets
+  operationId: listMyTickets
+  x-ogen-operation-group: Tickets
+  summary: List my tickets
+  security:
+    - bearerAuth: []
+  parameters:
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyTicketList.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

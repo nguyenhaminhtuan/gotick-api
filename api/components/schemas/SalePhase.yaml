@@ -1,0 +1,31 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  startTime:
+    type: string
+    format: date-time
+  endTime:
+    type: string
+    format: date-time
+  maxBuyPerCustomer:
+    type: integer
+  status:
+    $ref: ./SalePhaseStatus.yaml
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - name
+  - startTime
+  - endTime
+  - maxBuyPerCustomer
+  - status
+  - createdAt
+  - updatedAt

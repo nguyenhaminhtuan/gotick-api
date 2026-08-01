@@ -1,0 +1,32 @@
+post:
+  tags:
+    - Organizer Sale Phases
+  operationId: startOrgSalePhase
+  x-ogen-operation-group: SalePhases
+  summary: Start a sale phase
+  parameters:
+    - name: occurrenceId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - name: salePhaseId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/SalePhase.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

@@ -1,0 +1,14 @@
+type: object
+properties:
+  role:
+    $ref: ./OrganizerMemberRole.yaml
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - role
+  - createdAt
+  - updatedAt

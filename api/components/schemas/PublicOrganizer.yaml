@@ -1,0 +1,22 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  slug:
+    $ref: ./Slug.yaml
+  name:
+    type: string
+  logo:
+    type: string
+  description:
+    type: string
+  publicContact:
+    type: object
+    additionalProperties: true
+required:
+  - id
+  - slug
+  - name
+  - logo
+  - description
+  - publicContact

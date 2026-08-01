@@ -1,0 +1,44 @@
+get:
+  tags:
+    - Admin Cities
+  operationId: listAdminCities
+  x-ogen-operation-group: Cities
+  summary: List cities
+  security:
+    - bearerAuth: []
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CityList.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - Admin Cities
+  operationId: createAdminCity
+  x-ogen-operation-group: Cities
+  summary: Create a city
+  security:
+    - bearerAuth: []
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/City.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

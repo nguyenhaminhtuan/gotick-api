@@ -1,0 +1,16 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  fullName:
+    type: string
+  email:
+    type: string
+    format: email
+  avatar:
+    type: string
+required:
+  - id
+  - fullName
+  - email
+  - avatar

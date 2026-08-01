@@ -1,0 +1,23 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  status:
+    $ref: ./OrganizerApplicationStatus.yaml
+  reviewNote:
+    type: string
+  reviewedAt:
+    type: string
+    format: date-time
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - status
+  - reviewNote
+  - createdAt
+  - updatedAt

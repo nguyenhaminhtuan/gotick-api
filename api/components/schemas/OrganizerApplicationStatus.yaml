@@ -1,0 +1,6 @@
+type: string
+enum:
+  - pending
+  - approved
+  - changes_requested
+  - rejected

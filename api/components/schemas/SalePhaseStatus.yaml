@@ -1,0 +1,7 @@
+type: string
+enum:
+  - coming_soon
+  - on_sale
+  - suspended
+  - ended
+  - canceled

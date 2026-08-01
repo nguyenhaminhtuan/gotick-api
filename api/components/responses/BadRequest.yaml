@@ -1,0 +1,8 @@
+description: Bad request - invalid input parameters.
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/Error.yaml
+    example:
+      error: ValidationError
+      message: One or more fields are invalid.

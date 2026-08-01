@@ -1,0 +1,19 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  zone:
+    type: string
+  price:
+    type: integer
+    format: int64
+  maxBuyPerCustomer:
+    type: integer
+required:
+  - id
+  - name
+  - zone
+  - price
+  - maxBuyPerCustomer

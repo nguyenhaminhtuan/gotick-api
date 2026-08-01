@@ -1,0 +1,66 @@
+get:
+  tags:
+    - Organizer Occurrences
+  operationId: getOrgOccurrence
+  x-ogen-operation-group: Occurrences
+  summary: Get an occurrence
+  parameters:
+    - name: eventId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - name: occurrenceId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Occurrence.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+patch:
+  tags:
+    - Organizer Occurrences
+  operationId: updateOrgOccurrence
+  x-ogen-operation-group: Occurrences
+  summary: Update an occurrence
+  parameters:
+    - name: eventId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - name: occurrenceId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Occurrence.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

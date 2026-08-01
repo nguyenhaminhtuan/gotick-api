@@ -1,0 +1,30 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  fullName:
+    type: string
+  email:
+    type: string
+    format: email
+  avatar:
+    type: string
+  status:
+    $ref: ./AccountStatus.yaml
+  suspendedAt:
+    type: string
+    format: date-time
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - fullName
+  - email
+  - avatar
+  - status
+  - createdAt
+  - updatedAt

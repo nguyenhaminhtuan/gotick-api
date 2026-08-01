@@ -1,0 +1,21 @@
+get:
+  tags:
+    - Public Organizers
+  operationId: listPublicOrganizers
+  x-ogen-operation-group: Organizers
+  summary: List organizers
+  security: []
+  parameters:
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PublicOrganizerList.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

@@ -1,0 +1,45 @@
+get:
+  tags:
+    - Organizer Events
+  operationId: listOrgEvents
+  x-ogen-operation-group: Events
+  summary: List events
+  parameters:
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/EventList.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - Organizer Events
+  operationId: createOrgEvent
+  x-ogen-operation-group: Events
+  summary: Create an event
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Event.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

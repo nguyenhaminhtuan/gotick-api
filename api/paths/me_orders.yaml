@@ -1,0 +1,45 @@
+get:
+  tags:
+    - My Orders
+  operationId: listMyOrders
+  x-ogen-operation-group: Orders
+  summary: List my orders
+  security:
+    - bearerAuth: []
+  parameters:
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyOrderList.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - My Orders
+  operationId: createMyOrder
+  x-ogen-operation-group: Orders
+  summary: Create an order
+  security:
+    - bearerAuth: []
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyOrder.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

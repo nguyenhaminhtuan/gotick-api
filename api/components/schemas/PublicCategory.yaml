@@ -1,0 +1,17 @@
+type: object
+properties:
+  id:
+    type: integer
+  name:
+    type: string
+  slug:
+    $ref: ./Slug.yaml
+  icon:
+    type: string
+  displayOrder:
+    type: integer
+required:
+  - id
+  - name
+  - slug
+  - displayOrder

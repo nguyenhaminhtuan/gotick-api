@@ -1,0 +1,60 @@
+get:
+  tags:
+    - Organizer Occurrences
+  operationId: listOrgOccurrences
+  x-ogen-operation-group: Occurrences
+  summary: List occurrences
+  parameters:
+    - name: eventId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/OccurrenceList.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - Organizer Occurrences
+  operationId: createOrgOccurrence
+  x-ogen-operation-group: Occurrences
+  summary: Create an occurrence
+  parameters:
+    - name: eventId
+      in: path
+      required: true
+      schema:
+        $ref: ../components/schemas/UUID.yaml
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Occurrence.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

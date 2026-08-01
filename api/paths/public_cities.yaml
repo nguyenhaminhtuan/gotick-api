@@ -1,0 +1,18 @@
+get:
+  tags:
+    - Public Cities
+  operationId: listPublicCities
+  x-ogen-operation-group: Cities
+  summary: List cities
+  security: []
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PublicCityList.yaml
+    '429':
+      $ref: ../components/responses/TooManyRequests.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

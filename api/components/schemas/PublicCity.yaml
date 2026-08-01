@@ -1,0 +1,16 @@
+type: object
+properties:
+  code:
+    type: string
+  name:
+    type: string
+  nameEn:
+    type: string
+  fullName:
+    type: string
+  fullNameEn:
+    type: string
+required:
+  - code
+  - name
+  - fullName

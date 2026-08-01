@@ -1,0 +1,24 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  totalAmount:
+    type: integer
+    format: int64
+  status:
+    $ref: ./OrderStatus.yaml
+  holdExpiresAt:
+    type: string
+    format: date-time
+  createdAt:
+    type: string
+    format: date-time
+  updatedAt:
+    type: string
+    format: date-time
+required:
+  - id
+  - totalAmount
+  - status
+  - createdAt
+  - updatedAt

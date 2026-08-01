@@ -1,0 +1,13 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  quantity:
+    type: integer
+  unitPrice:
+    type: integer
+    format: int64
+required:
+  - id
+  - quantity
+  - unitPrice
