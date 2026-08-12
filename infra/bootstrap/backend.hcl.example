@@ -1,0 +1,3 @@
+# The seed_state_bucket output of this stack, available only after the first apply
+bucket = "bkt-gotick-seed-<rand>"
+prefix = "bootstrap"

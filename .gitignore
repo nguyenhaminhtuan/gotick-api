@@ -28,3 +28,19 @@ dist/
 
 # OS X generated file
 .DS_Store
+
+# Terraform
+*.tfvars
+*.tfvars.json
+!*.tfvars.example
+backend.hcl
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+.claude/settings.local.json

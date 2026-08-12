@@ -1,8 +1,5 @@
--- migrate:up
-SET lock_timeout = '1s';
-set statement_timeout = '5s';
-
-CREATE TABLE "accounts" (
+-- +goose Up
+CREATE TABLE IF NOT EXISTS "accounts" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "full_name" text NOT NULL,
     "email" text NOT NULL,
@@ -15,7 +12,7 @@ CREATE TABLE "accounts" (
     UNIQUE ("email")
 );
 
-CREATE TABLE "organizers" (
+CREATE TABLE IF NOT EXISTS "organizers" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "name" text NOT NULL,
     "description" text NOT NULL,
@@ -33,7 +30,7 @@ CREATE TABLE "organizers" (
     UNIQUE ("email")
 );
 
-CREATE TABLE "organizer_applications" (
+CREATE TABLE IF NOT EXISTS "organizer_applications" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "organizer_id" uuid NOT NULL,
     "status" text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'changes_requested', 'rejected')),
@@ -47,7 +44,7 @@ CREATE TABLE "organizer_applications" (
 
 CREATE INDEX "organizer_applications_organizer_id_idx" ON "organizer_applications" ("organizer_id");
 
-CREATE TABLE "organizer_members" (
+CREATE TABLE IF NOT EXISTS "organizer_members" (
     "organizer_id" uuid NOT NULL,
     "account_id" uuid NOT NULL,
     "role" text NOT NULL CHECK (role IN ('owner', 'staff')),
@@ -60,7 +57,7 @@ CREATE TABLE "organizer_members" (
 
 CREATE INDEX "organizer_members_account_id_idx" ON "organizer_members" ("account_id");
 
-CREATE TABLE "platform_staff" (
+CREATE TABLE IF NOT EXISTS "platform_staff" (
     "account_id" uuid NOT NULL,
     "created_at" timestamptz NOT NULL DEFAULT now(),
     "updated_at" timestamptz NOT NULL DEFAULT now(),
@@ -68,7 +65,7 @@ CREATE TABLE "platform_staff" (
     FOREIGN KEY ("account_id") REFERENCES "accounts" ("id") ON DELETE CASCADE
 );
 
-CREATE TABLE "categories" (
+CREATE TABLE IF NOT EXISTS "categories" (
     "id" smallint GENERATED ALWAYS AS IDENTITY,
     "name" text NOT NULL,
     "slug" varchar(60) NOT NULL,
@@ -81,7 +78,7 @@ CREATE TABLE "categories" (
     UNIQUE ("slug")
 );
 
-CREATE TABLE "cities" (
+CREATE TABLE IF NOT EXISTS "cities" (
     "code" varchar(20) NOT NULL,
     "name" text NOT NULL,
     "name_en" text,
@@ -91,7 +88,7 @@ CREATE TABLE "cities" (
     PRIMARY KEY ("code")
 );
 
-CREATE TABLE "events" (
+CREATE TABLE IF NOT EXISTS "events" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "organizer_id" uuid NOT NULL,
     "category_id" smallint,
@@ -116,7 +113,7 @@ CREATE INDEX "events_organizer_id_idx" ON "events" ("organizer_id");
 
 CREATE INDEX "events_category_id_idx" ON "events" ("category_id");
 
-CREATE TABLE "occurrences" (
+CREATE TABLE IF NOT EXISTS "occurrences" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "event_id" uuid NOT NULL,
     "name" text NOT NULL,
@@ -137,7 +134,7 @@ CREATE TABLE "occurrences" (
 
 CREATE INDEX "occurrences_event_id_idx" ON "occurrences" ("event_id");
 
-CREATE TABLE "ticket_categories" (
+CREATE TABLE IF NOT EXISTS "ticket_categories" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "occurrence_id" uuid NOT NULL,
     "name" text NOT NULL,
@@ -155,7 +152,7 @@ CREATE TABLE "ticket_categories" (
 
 CREATE INDEX "ticket_categories_occurrence_id_idx" ON "ticket_categories" ("occurrence_id");
 
-CREATE TABLE "sale_phases" (
+CREATE TABLE IF NOT EXISTS "sale_phases" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "occurrence_id" uuid NOT NULL,
     "name" text NOT NULL,
@@ -171,7 +168,7 @@ CREATE TABLE "sale_phases" (
 
 CREATE INDEX "sale_phases_occurrence_id_idx" ON "sale_phases" ("occurrence_id");
 
-CREATE TABLE "sale_phase_categories" (
+CREATE TABLE IF NOT EXISTS "sale_phase_categories" (
     "sale_phase_id" uuid NOT NULL,
     "ticket_category_id" uuid NOT NULL,
     PRIMARY KEY ("sale_phase_id", "ticket_category_id"),
@@ -181,7 +178,7 @@ CREATE TABLE "sale_phase_categories" (
 
 CREATE INDEX "sale_phase_categories_ticket_category_id_idx" ON "sale_phase_categories" ("ticket_category_id");
 
-CREATE TABLE "orders" (
+CREATE TABLE IF NOT EXISTS "orders" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "customer_id" uuid NOT NULL,
     "occurrence_id" uuid NOT NULL,
@@ -199,7 +196,7 @@ CREATE INDEX "orders_customer_id_idx" ON "orders" ("customer_id");
 
 CREATE INDEX "orders_occurrence_id_idx" ON "orders" ("occurrence_id");
 
-CREATE TABLE "order_items" (
+CREATE TABLE IF NOT EXISTS "order_items" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "order_id" uuid NOT NULL,
     "ticket_category_id" uuid NOT NULL,
@@ -216,7 +213,7 @@ CREATE INDEX "order_items_order_id_idx" ON "order_items" ("order_id");
 
 CREATE INDEX "order_items_ticket_category_id_idx" ON "order_items" ("ticket_category_id");
 
-CREATE TABLE "tickets" (
+CREATE TABLE IF NOT EXISTS "tickets" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "order_item_id" uuid NOT NULL,
     "event_id" uuid NOT NULL,
@@ -237,22 +234,16 @@ CREATE TABLE "tickets" (
 
 CREATE INDEX "tickets_order_item_id_idx" ON "tickets" ("order_item_id");
 
--- migrate:down
-SET lock_timeout = '1s';
-set statement_timeout = '5s';
+CREATE TABLE IF NOT EXISTS "assets" (
+    "id" uuid NOT NULL DEFAULT uuidv7(),
+    "storage_key" text NOT NULL UNIQUE,
+    "status" text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'committed')),
+    "content_type" text NOT NULL,
+    "size_bytes" bigint,
+    "checksum" text,
+    "created_at" timestamptz NOT NULL DEFAULT now(),
+    "committed_at" timestamptz,
+    PRIMARY KEY ("id")
+);
 
-DROP TABLE IF EXISTS "tickets";
-DROP TABLE IF EXISTS "order_items";
-DROP TABLE IF EXISTS "orders";
-DROP TABLE IF EXISTS "sale_phase_categories";
-DROP TABLE IF EXISTS "sale_phases";
-DROP TABLE IF EXISTS "ticket_categories";
-DROP TABLE IF EXISTS "occurrences";
-DROP TABLE IF EXISTS "events";
-DROP TABLE IF EXISTS "cities";
-DROP TABLE IF EXISTS "categories";
-DROP TABLE IF EXISTS "platform_staff";
-DROP TABLE IF EXISTS "organizer_members";
-DROP TABLE IF EXISTS "organizer_applications";
-DROP TABLE IF EXISTS "organizers";
-DROP TABLE IF EXISTS "accounts";
+-- +goose Down

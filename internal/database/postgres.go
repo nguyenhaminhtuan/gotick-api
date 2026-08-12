@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/tracelog"
 	pgxslog "github.com/mcosta74/pgx-slog"
@@ -24,6 +25,9 @@ func NewPostgresPool(ctx context.Context, cfg config.DBConfig, logger *slog.Logg
 		logLevel = tracelog.LogLevelDebug
 	}
 
+	pgCfg.MinConns = cfg.MinConns
+	pgCfg.MaxConns = cfg.MaxConns
+	pgCfg.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeDescribeExec
 	pgCfg.ConnConfig.Tracer = &tracelog.TraceLog{
 		Logger:   pgxslog.NewLogger(l),
 		LogLevel: logLevel,

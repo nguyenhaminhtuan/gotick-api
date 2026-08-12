@@ -1,4 +1,4 @@
--- migrate:up
+-- +goose Up
 INSERT INTO cities (code, name, name_en, full_name, full_name_en) VALUES
     ('ha-noi',      'Hà Nội',      'Hanoi',       'Thành phố Hà Nội',      'Hanoi City'),
     ('cao-bang',    'Cao Bằng',    'Cao Bang',    'Tỉnh Cao Bằng',         'Cao Bang Province'),
@@ -35,5 +35,4 @@ INSERT INTO cities (code, name, name_en, full_name, full_name_en) VALUES
     ('can-tho',     'Cần Thơ',     'Can Tho',     'Thành phố Cần Thơ',     'Can Tho City'),
     ('ca-mau',      'Cà Mau',      'Ca Mau',      'Tỉnh Cà Mau',           'Ca Mau Province');
 
--- migrate:down
-
+-- +goose Down
