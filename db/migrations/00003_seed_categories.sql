@@ -1,4 +1,4 @@
--- migrate:up
+-- +goose Up
 INSERT INTO categories (name, slug, icon, display_order) VALUES
     ('Ca nhạc',                'concert',           'music',           10),
     ('Lễ hội âm nhạc',         'music-festival',    'party-popper',    20),
@@ -14,5 +14,4 @@ INSERT INTO categories (name, slug, icon, display_order) VALUES
     ('Networking',             'networking',        'users',          120),
     ('Khác',                   'other',             'more-horizontal', 999);
 
--- migrate:down
-
+-- +goose Down

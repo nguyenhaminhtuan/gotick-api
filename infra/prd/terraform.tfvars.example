@@ -1,0 +1,12 @@
+project_id = "prj-gotick-prd-<rand>"
+app_name   = "gotick"
+region     = "asia-southeast1"
+domain     = "<domain>"
+
+developers = ["user:<you>@gmail.com"]
+
+# First apply only, before the instance exists.
+# enable_db_provision = false
+
+# Leave on. Off lets terraform destroy the instance, the buckets and the secrets.
+# deletion_protection = false

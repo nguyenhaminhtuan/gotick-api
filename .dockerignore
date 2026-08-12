@@ -18,6 +18,7 @@ Makefile
 compose.yaml
 firebase.json
 docker
+!docker/*/entrypoint.sh
 scripts
 .air.toml
 .ogen.yml

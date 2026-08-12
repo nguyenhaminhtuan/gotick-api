@@ -1,0 +1,18 @@
+project_id = "prj-gotick-dev-<rand>"
+app_name   = "gotick"
+region     = "asia-southeast1"
+domain     = "<domain>"
+
+developers = ["user:<you>@gmail.com"]
+
+# APIs & Services > Credentials > OAuth client ID > Web application, then add
+# https://iap.googleapis.com/v1/oauth/clientIds/<client-id>:handleRedirect as an
+# authorized redirect URI. Console only, see the load-balancer module.
+iap_oauth_client_id     = "<client-id>.apps.googleusercontent.com"
+iap_oauth_client_secret = "<client-secret>"
+
+# First apply only, before the instance exists.
+# enable_db_provision = false
+
+# Off in dev lets terraform destroy the instance, the buckets and the secrets.
+# deletion_protection = false

@@ -1,0 +1,10 @@
+app_name        = "gotick"
+billing_account = "<billing-account-id>"
+region          = "asia-southeast1"
+
+github_owner = "nguyenhaminhtuan"
+github_repo  = "gotick"
+
+developers = ["user:<you>@gmail.com"]
+
+deletion_protection = true

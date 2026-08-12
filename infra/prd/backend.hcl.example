@@ -1,0 +1,2 @@
+# The state_buckets output of infra/bootstrap for this environment.
+bucket = "bkt-gotick-prd-<rand>"

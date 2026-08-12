@@ -22,6 +22,17 @@ type Account struct {
 	UpdatedAt   time.Time
 }
 
+type Asset struct {
+	ID          uuid.UUID
+	StorageKey  string
+	Status      string
+	ContentType string
+	SizeBytes   pgtype.Int8
+	Checksum    pgtype.Text
+	CreatedAt   time.Time
+	CommittedAt *time.Time
+}
+
 type Category struct {
 	ID           int16
 	Name         string

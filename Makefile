@@ -1,11 +1,17 @@
-BUILD_DIR 	:= ./bin
-API_ENTRY	:= ./cmd/api
-MIGRATE_CMD := go run ./cmd/migrate
-
 ifneq (,$(wildcard .env))
 	include .env
 	export
 endif
+
+BUILD_DIR 	:= ./bin
+API_ENTRY	:= ./cmd/api
+DB_SCHEMA 	?= app
+DB_PORT		?= 5432
+
+export GOOSE_DRIVER          := postgres
+export GOOSE_DBSTRING        := postgres://$(DB_USER):$(DB_PASSWORD)@$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(DB_SSL_MODE)&search_path=$(DB_SCHEMA)
+export GOOSE_MIGRATION_DIR   ?= db/migrations
+export GOOSE_TABLE           ?= public.migrations
 
 ##@ Build & Test
 .PHONY: build
@@ -33,24 +39,28 @@ sqlc-generate: ## Generate code from SQL queries
 
 ##@ Migrations
 .PHONY: migrate-new
-migrate-new: ## Create a new migration file
-	dbmate -d db/migrations new $(name)
+migrate-new: ## Create an empty migration file
+	goose create $(name) sql
 
 .PHONY: migrate-up
 migrate-up: ## Apply migration to latest version
-	$(MIGRATE_CMD) up
+	goose up
 
 .PHONY: migrate-down
 migrate-down: ## Rollback a latest migration version
-	$(MIGRATE_CMD) down
+	goose down
 
 .PHONY: migrate-status
 migrate-status: ## Show migration status
-	$(MIGRATE_CMD) status
+	goose status
+
+.PHONY: migrate-version
+migrate-version: ## Show the current migration version
+	goose version
 
 .PHONY: migrate-lint
 migrate-lint: ## Lint migration files
-	squawk -c=.squawk.toml ./db/migrations/*.sql
+	find ./db/migrations ./db/background -name '*.sql' -exec squawk -c=.squawk.toml {} +
 
 ##@API Docs
 .PHONY: openapi-bundle
