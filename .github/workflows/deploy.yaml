@@ -1,0 +1,255 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+    paths-ignore:
+      - 'infra/**'
+      - '.vscode/**'
+      - '**.md'
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options:
+          - dev
+          - prd
+        default: dev
+
+concurrency:
+  # Never cancel a deploy in flight
+  group: deploy-${{ inputs.environment || (startsWith(github.ref, 'refs/tags/') && 'prd' || 'dev') }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      environment: ${{ steps.plan.outputs.environment }}
+      images: ${{ steps.plan.outputs.images }}
+      api: ${{ steps.plan.outputs.api }}
+      migrate: ${{ steps.plan.outputs.migrate }}
+      docs: ${{ steps.plan.outputs.docs }}
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # A tag push carries no previous ref to diff against, and a release should
+      # land whole anyway.
+      - id: changed
+        uses: ./.github/actions/changed-images
+        with:
+          force: ${{ github.event_name != 'push' || startsWith(github.ref, 'refs/tags/') }}
+
+      - id: plan
+        env:
+          ENVIRONMENT: ${{ inputs.environment || (startsWith(github.ref, 'refs/tags/') && 'prd' || 'dev') }}
+          # The tag itself is the version, so prd never has to guess one.
+          REF_VERSION: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
+          API: ${{ steps.changed.outputs.api }}
+          MIGRATE: ${{ steps.changed.outputs.migrate }}
+          DOCS: ${{ steps.changed.outputs.docs }}
+        run: |
+          set -euo pipefail
+
+          api="${API}"
+          migrate="${MIGRATE}"
+          docs="${DOCS}"
+
+          # infra/prd declares no docs service, and the docs runtime account
+          # exists only in dev.
+          if [ "${ENVIRONMENT}" != "dev" ]; then
+            docs=false
+          fi
+
+          # Only prd carries the released version as a third tag. A manual prd
+          # deploy has no tag to read it from, so it falls back to the manifest.
+          version=''
+          if [ -n "${REF_VERSION}" ]; then
+            version="${REF_VERSION}"
+          elif [ "${ENVIRONMENT}" = "prd" ]; then
+            version="v$(jq -r '."."' .release-manifest.json)"
+          fi
+
+          images=$(jq -cn --argjson api "${api}" --argjson migrate "${migrate}" --argjson docs "${docs}" '
+            [
+              if $api then "api" else empty end,
+              if $migrate then "migrate" else empty end,
+              if $docs then "docs" else empty end
+            ]')
+
+          {
+            echo "environment=${ENVIRONMENT}"
+            echo "api=${api}"
+            echo "migrate=${migrate}"
+            echo "docs=${docs}"
+            echo "images=${images}"
+            echo "version=${version}"
+            # Must match the tag build.yaml derives from the same commit.
+            echo "tag=sha-${GITHUB_SHA:0:7}"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Deploying to ${ENVIRONMENT}: ${images}"
+
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yaml
+    permissions:
+      contents: read
+      # Passed through to the image job ci.yaml calls; see the note there.
+      id-token: write
+
+  build:
+    name: Build
+    needs: [plan, ci]
+    if: needs.plan.outputs.images != '[]'
+    uses: ./.github/workflows/build.yaml
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      images: ${{ needs.plan.outputs.images }}
+      push: true
+      environment: ${{ needs.plan.outputs.environment }}
+      version: ${{ needs.plan.outputs.version }}
+
+  migrate:
+    name: Migrate
+    needs: [plan, build]
+    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.plan.outputs.migrate == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ needs.plan.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          scripts/deploy-job.sh \
+            --project "${PROJECT}" \
+            --region "${REGION}" \
+            --repo containers \
+            --image migrate \
+            --tag "${TAG}"
+
+  migrate-background:
+    name: Migrate background
+    needs: [plan, build]
+    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.plan.outputs.migrate == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ needs.plan.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          scripts/deploy-job.sh \
+            --project "${PROJECT}" \
+            --region "${REGION}" \
+            --repo containers \
+            --image migrate \
+            --job migrate-background \
+            --tag "${TAG}" \
+            --execute false
+
+  api:
+    name: API
+    needs: [plan, build, migrate]
+    # Schema first. A skipped migrate is fine; a failed one is not.
+    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.migrate.result != 'failure' && needs.plan.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ needs.plan.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          scripts/deploy-service.sh \
+            --project "${PROJECT}" \
+            --region "${REGION}" \
+            --repo containers \
+            --image api \
+            --tag "${TAG}"
+
+  docs:
+    name: Docs
+    needs: [plan, build]
+    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.plan.outputs.docs == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: ${{ needs.plan.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          scripts/deploy-service.sh \
+            --project "${PROJECT}" \
+            --region "${REGION}" \
+            --repo containers \
+            --image docs \
+            --tag "${TAG}"

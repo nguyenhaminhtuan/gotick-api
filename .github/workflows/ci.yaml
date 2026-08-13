@@ -6,13 +6,6 @@ on:
       - 'infra/**'
       - '.vscode/**'
       - '**.md'
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - 'infra/**'
-      - '.vscode/**'
-      - '**.md'
   schedule:
     # The vulnerability database moves even when the code does not.
     - cron: '0 2 * * 1'
@@ -22,8 +15,7 @@ on:
 
 concurrency:
   # Under workflow_call, github.workflow resolves to the caller's name, so a
-  # deploy that calls this workflow gets a group of its own rather than
-  # cancelling the run that push already started.
+  # deploy-driven run never cancels a pull request's own run on the same ref.
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
@@ -137,3 +129,33 @@ jobs:
       - uses: ./.github/actions/setup-go
 
       - run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
+
+  changes:
+    name: Changed images
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      images: ${{ steps.changed.outputs.images }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - id: changed
+        uses: ./.github/actions/changed-images
+        with:
+          force: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/') }}
+
+  images:
+    name: Images
+    needs: changes
+    if: needs.changes.outputs.images != '[]'
+    uses: ./.github/workflows/build.yaml
+    permissions:
+      contents: read
+      # build.yaml declares it for pushing and a caller cannot grant less.
+      # Unused here: push is false.
+      id-token: write
+    with:
+      images: ${{ needs.changes.outputs.images }}
+      push: false
