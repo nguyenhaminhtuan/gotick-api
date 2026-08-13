@@ -1,0 +1,89 @@
+name: Changed images
+description: Decide which container images the changes in this run affect.
+
+inputs:
+  force:
+    description: >-
+      Treat every image as changed. A run with no diff to read, such as a manual
+      dispatch, has to consider everything in scope.
+    required: false
+    default: 'false'
+
+outputs:
+  api:
+    description: Whether the api image is affected.
+    value: ${{ steps.plan.outputs.api }}
+  migrate:
+    description: Whether the migrate image is affected.
+    value: ${{ steps.plan.outputs.migrate }}
+  docs:
+    description: Whether the docs image is affected.
+    value: ${{ steps.plan.outputs.docs }}
+  images:
+    description: JSON array of the affected image names, e.g. '["api","migrate"]'.
+    value: ${{ steps.plan.outputs.images }}
+
+runs:
+  using: composite
+  steps:
+    # The three images have disjoint inputs, so these lists decide the question
+    # exactly rather than approximately: migrate installs goose and copies SQL
+    # without reading the module's Go sources, and docs only bundles the spec.
+    - id: filter
+      if: inputs.force != 'true'
+      uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+      with:
+        filters: |
+          api:
+            - 'cmd/**'
+            - 'internal/**'
+            - 'go.mod'
+            - 'go.sum'
+            - 'docker/api/**'
+          migrate:
+            - 'db/migrations/**'
+            - 'db/background/**'
+            - 'docker/migrate/**'
+          docs:
+            - 'api/**'
+            - 'redocly.yaml'
+            - 'docker/docs/**'
+
+    - id: plan
+      shell: bash
+      env:
+        FORCE: ${{ inputs.force }}
+        FILTER_API: ${{ steps.filter.outputs.api }}
+        FILTER_MIGRATE: ${{ steps.filter.outputs.migrate }}
+        FILTER_DOCS: ${{ steps.filter.outputs.docs }}
+      run: |
+        set -euo pipefail
+
+        if [ "${FORCE}" = "true" ]; then
+          api=true
+          migrate=true
+          docs=true
+        else
+          api="${FILTER_API}"
+          migrate="${FILTER_MIGRATE}"
+          docs="${FILTER_DOCS}"
+        fi
+
+        images=$(jq -cn \
+          --argjson api "${api}" \
+          --argjson migrate "${migrate}" \
+          --argjson docs "${docs}" '
+          [
+            if $api then "api" else empty end,
+            if $migrate then "migrate" else empty end,
+            if $docs then "docs" else empty end
+          ]')
+
+        {
+          echo "api=${api}"
+          echo "migrate=${migrate}"
+          echo "docs=${docs}"
+          echo "images=${images}"
+        } >> "$GITHUB_OUTPUT"
+
+        echo "Affected images: ${images}"

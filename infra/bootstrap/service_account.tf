@@ -152,8 +152,13 @@ module "github_oidc" {
   github_repo  = var.github_repo
   pool_id      = "pool-${each.key}-github-${random_id.wif.hex}"
 
-  service_account_ids = [
-    module.gha_infra_sa[each.key].id,
-    module.gha_deployer_sa[each.key].id,
-  ]
+  # Terraform runs outside any GitHub environment, so it stays repository-scoped.
+  service_account_ids = [module.gha_infra_sa[each.key].id]
+
+  # The deployer is reachable only from the GitHub environment of the same name,
+  # so a run that has not cleared that environment's protection rules cannot
+  # deploy with it.
+  environment_service_account_ids = {
+    (each.key) = [module.gha_deployer_sa[each.key].id]
+  }
 }
