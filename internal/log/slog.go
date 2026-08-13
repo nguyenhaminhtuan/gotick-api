@@ -2,11 +2,12 @@ package log
 
 import (
 	"fmt"
-	"gotick/internal/config"
 	"io"
 	"log/slog"
 	"os"
 	"time"
+
+	"gotick/internal/config"
 
 	"github.com/rs/zerolog"
 	slogctx "github.com/veqryn/slog-context"

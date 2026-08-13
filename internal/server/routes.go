@@ -2,8 +2,9 @@ package server
 
 import (
 	"fmt"
-	"gotick/internal/oas"
 	"net/http"
+
+	"gotick/internal/oas"
 )
 
 func (s *server) registerRoutes() (http.Handler, error) {

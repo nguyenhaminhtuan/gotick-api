@@ -1,10 +1,11 @@
 package api
 
 import (
+	"log/slog"
+
 	"gotick/internal/auth"
 	"gotick/internal/database"
 	"gotick/internal/oas"
-	"log/slog"
 )
 
 type deps struct {

@@ -26,7 +26,9 @@ func (db *DB) WithTx(ctx context.Context, fn func(*Queries) error) error {
 		return fmt.Errorf("begin transaction: %w", err)
 	}
 
-	defer tx.Rollback(context.WithoutCancel(ctx))
+	// A rollback after a successful commit is a no-op that reports
+	// pgx.ErrTxClosed, so the error is deliberately dropped.
+	defer func() { _ = tx.Rollback(context.WithoutCancel(ctx)) }()
 
 	if err := fn(db.Queries.WithTx(tx)); err != nil {
 		return err

@@ -3,9 +3,10 @@ package database
 import (
 	"context"
 	"fmt"
-	"gotick/internal/config"
 	"log/slog"
 	"time"
+
+	"gotick/internal/config"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

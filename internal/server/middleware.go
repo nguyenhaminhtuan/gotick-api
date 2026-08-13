@@ -2,11 +2,12 @@ package server
 
 import (
 	"encoding/json"
-	"gotick/internal/oas"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
 	"strconv"
+
+	"gotick/internal/oas"
 
 	"github.com/felixge/httpsnoop"
 	"github.com/rs/cors"
@@ -70,6 +71,8 @@ func (s *server) recoverer(next http.Handler) http.Handler {
 
 			// The documented way to abandon a response on purpose; it has to
 			// keep going up to net/http.
+			//nolint:errorlint // rec is any, and net/http panics with the
+			// sentinel itself, so this mirrors net/http's own check.
 			if rec == http.ErrAbortHandler {
 				panic(rec)
 			}
