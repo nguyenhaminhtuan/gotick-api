@@ -99,7 +99,7 @@ jobs:
         with:
           node-version: 24
 
-      - run: redocly lint
+      - run: redocly lint --format=github-actions
 
   ogen:
     name: ogen drift
