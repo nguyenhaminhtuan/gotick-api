@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"gotick/internal/oas"
 	"log/slog"
 	"net/http"
+
+	"gotick/internal/oas"
 
 	"github.com/ogen-go/ogen/ogenerrors"
 )

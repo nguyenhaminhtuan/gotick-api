@@ -3,10 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
-	"gotick/internal/config"
-	"gotick/internal/oas"
 	"log/slog"
 	"net/http"
+
+	"gotick/internal/config"
+	"gotick/internal/oas"
 )
 
 type APIHandler interface {

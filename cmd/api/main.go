@@ -3,18 +3,19 @@ package main
 import (
 	"context"
 	"errors"
-	"gotick/internal/api"
-	"gotick/internal/auth"
-	"gotick/internal/config"
-	"gotick/internal/database"
-	"gotick/internal/log"
-	"gotick/internal/server"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"gotick/internal/api"
+	"gotick/internal/auth"
+	"gotick/internal/config"
+	"gotick/internal/database"
+	"gotick/internal/log"
+	"gotick/internal/server"
 )
 
 func main() {

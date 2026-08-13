@@ -1,0 +1,33 @@
+name: Setup Go
+description: Install Go from go.mod with the module and build caches enabled.
+
+inputs:
+  go-version-file:
+    description: File the Go version is read from.
+    required: false
+    default: go.mod
+  download:
+    description: Run `go mod download` once the caches are restored.
+    required: false
+    default: 'true'
+
+outputs:
+  go-version:
+    description: Go version that was installed.
+    value: ${{ steps.go.outputs.go-version }}
+  cache-hit:
+    description: Whether the caches were restored from an exact key match.
+    value: ${{ steps.go.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    - id: go
+      uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version-file: ${{ inputs.go-version-file }}
+        cache: true
+
+    - if: inputs.download == 'true'
+      shell: bash
+      run: go mod download

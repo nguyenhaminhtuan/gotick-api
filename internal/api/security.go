@@ -2,9 +2,10 @@ package api
 
 import (
 	"context"
+	"log/slog"
+
 	"gotick/internal/auth"
 	"gotick/internal/oas"
-	"log/slog"
 
 	slogctx "github.com/veqryn/slog-context"
 )
