@@ -1,0 +1,139 @@
+name: CI
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'infra/**'
+      - '.vscode/**'
+      - '**.md'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'infra/**'
+      - '.vscode/**'
+      - '**.md'
+  schedule:
+    # The vulnerability database moves even when the code does not.
+    - cron: '0 2 * * 1'
+  # Lets a deploy workflow gate on a fresh run, and allows re-running by hand.
+  workflow_call:
+  workflow_dispatch:
+
+concurrency:
+  # Under workflow_call, github.workflow resolves to the caller's name, so a
+  # deploy that calls this workflow gets a group of its own rather than
+  # cancelling the run that push already started.
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-go
+
+      - run: make build
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-go
+
+      - run: go test -race -shuffle=on ./...
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-go
+
+      - uses: golangci/golangci-lint-action@d583c34f0599d37dbac4a198b9c83201be380893 # v9.3.0
+        with:
+          version: v2.10.1
+
+  sqlc:
+    name: sqlc drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: sqlc-dev/setup-sqlc@bac53b7fb28c039a6c7f5736fd1e89744021bdd6 # v5.0.0
+        with:
+          sqlc-version: '1.30.0'
+
+      - run: sqlc diff
+
+  openapi:
+    name: OpenAPI lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-redocly
+        with:
+          node-version: 24
+
+      - run: redocly lint
+
+  ogen:
+    name: ogen drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-go
+
+      - uses: ./.github/actions/setup-redocly
+        with:
+          node-version: 24
+
+      - run: redocly bundle
+
+      - run: go generate ./...
+
+      - name: Fail if the ogen output is out of date
+        run: |
+          git add --intent-to-add .
+          git diff --exit-code
+
+  vuln:
+    name: Vulnerabilities
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: ./.github/actions/setup-go
+
+      - run: go run golang.org/x/vuln/cmd/govulncheck@v1.6.0 ./...
