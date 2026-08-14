@@ -126,7 +126,7 @@ jobs:
   migrate:
     name: Migrate
     needs: [plan, build]
-    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.plan.outputs.migrate == 'true' }}
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.plan.outputs.migrate == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: ${{ needs.plan.outputs.environment }}
@@ -158,7 +158,7 @@ jobs:
   migrate-background:
     name: Migrate background
     needs: [plan, build]
-    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.plan.outputs.migrate == 'true' }}
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.plan.outputs.migrate == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: ${{ needs.plan.outputs.environment }}
@@ -193,7 +193,7 @@ jobs:
     name: API
     needs: [plan, build, migrate]
     # Schema first. A skipped migrate is fine; a failed one is not.
-    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.migrate.result != 'failure' && needs.plan.outputs.api == 'true' }}
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.migrate.result != 'failure' && needs.plan.outputs.api == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: ${{ needs.plan.outputs.environment }}
@@ -225,7 +225,7 @@ jobs:
   docs:
     name: Docs
     needs: [plan, build]
-    if: ${{ !cancelled() && needs.build.result != 'failure' && needs.plan.outputs.docs == 'true' }}
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.plan.outputs.docs == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: ${{ needs.plan.outputs.environment }}
