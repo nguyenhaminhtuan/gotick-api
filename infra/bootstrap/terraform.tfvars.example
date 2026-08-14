@@ -3,7 +3,7 @@ billing_account = "<billing-account-id>"
 region          = "asia-southeast1"
 
 github_owner = "nguyenhaminhtuan"
-github_repo  = "gotick"
+github_repo  = "gotick-api"
 
 developers = ["user:<you>@gmail.com"]
 
