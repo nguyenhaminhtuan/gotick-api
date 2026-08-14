@@ -25,6 +25,7 @@ module "migrate" {
     DB_HOST     = module.database.private_ip_address
     DB_PORT     = "5432"
     DB_NAME     = module.database.database_name
+    DB_SCHEMA   = local.db_schema
     DB_USER     = "migrate"
     DB_SSL_MODE = "require"
 
@@ -64,6 +65,7 @@ module "migrate_background" {
     DB_HOST     = module.database.private_ip_address
     DB_PORT     = "5432"
     DB_NAME     = module.database.database_name
+    DB_SCHEMA   = local.db_schema
     DB_USER     = "migrate"
     DB_SSL_MODE = "require"
 
@@ -119,6 +121,7 @@ module "asset_cleaner" {
     DB_HOST       = module.database.private_ip_address
     DB_PORT       = "5432"
     DB_NAME       = module.database.database_name
+    DB_SCHEMA     = local.db_schema
     DB_USER       = "app"
     DB_SSL_MODE   = "require"
     ASSETS_BUCKET = module.assets_bucket.name
