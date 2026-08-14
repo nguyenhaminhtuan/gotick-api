@@ -3,10 +3,10 @@ info:
   title: Go Ticket API
   version: 1.0.0
 servers:
-  - url: https://api.gotick.example/v1
+  - url: https://api.gotick.nguyenhaminhtuan.org/v1
     description: Production Server
-  - url: https://test.api.gotick.example/v1
-    description: Test Server
+  - url: https://api.dev.gotick.nguyenhaminhtuan.org/v1
+    description: Development Server
   - url: http://127.0.0.1:8080/v1
     description: Local Server
 security:
