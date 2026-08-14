@@ -12,7 +12,7 @@ module "database" {
   peering_range_prefix_length = local.psa_range_prefix_length
   deletion_protection         = var.deletion_protection
 
-  activation_policy = "NEVER"
+  activation_policy = "ALWAYS"
   high_availability = false
 
   maintenance_window = {
@@ -37,4 +37,6 @@ module "database" {
   database_flags = {
     "cloudsql.iam_authentication" = "on"
   }
+
+  query_insights = {}
 }

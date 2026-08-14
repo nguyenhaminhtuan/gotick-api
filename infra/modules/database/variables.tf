@@ -264,6 +264,27 @@ variable "database_flags" {
   default     = {}
 }
 
+variable "query_insights" {
+  type = object({
+    query_plans_per_minute  = optional(number, 5)
+    query_string_length     = optional(number, 1024)
+    record_application_tags = optional(bool, false)
+    record_client_address   = optional(bool, false)
+  })
+
+  default = null
+
+  validation {
+    condition     = var.query_insights == null || (try(var.query_insights.query_plans_per_minute, 5) >= 0 && try(var.query_insights.query_plans_per_minute, 5) <= 20)
+    error_message = "query_plans_per_minute must be 0-20."
+  }
+
+  validation {
+    condition     = var.query_insights == null || (try(var.query_insights.query_string_length, 1024) >= 256 && try(var.query_insights.query_string_length, 1024) <= 4500)
+    error_message = "query_string_length must be 256-4500 bytes."
+  }
+}
+
 variable "backup_start_time" {
   description = "HH:MM UTC."
   type        = string
