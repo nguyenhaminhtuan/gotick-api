@@ -77,6 +77,16 @@ resource "postgresql_grant" "migrate_public_schema" {
   privileges  = ["USAGE", "CREATE"]
 }
 
+resource "postgresql_grant" "app_schema" {
+  count = local.db_provision
+
+  role        = postgresql_role.app[0].name
+  database    = local.db_name
+  schema      = postgresql_schema.app[0].name
+  object_type = "schema"
+  privileges  = ["USAGE"]
+}
+
 resource "postgresql_grant" "app_tables" {
   count = local.db_provision
 
