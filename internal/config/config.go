@@ -47,6 +47,7 @@ type DBConfig struct {
 	User     string `env:"USER,required"`
 	Password string `env:"PASSWORD,required"`
 	Name     string `env:"NAME,required"`
+	Schema   string `env:"SCHEMA" envDefault:"app"`
 	SSLMode  string `env:"SSL_MODE" envDefault:"require"`
 
 	StatementTimeout time.Duration `env:"STATEMENT_TIMEOUT" envDefault:"30s"`
@@ -84,10 +85,13 @@ func (c *Config) IsProd() bool {
 }
 
 func (c *DBConfig) DSN() string {
-	timeoutOption := fmt.Sprintf("-c statement_timeout=%d", c.StatementTimeout/time.Millisecond)
+	options := fmt.Sprintf(
+		"-c statement_timeout=%d -c search_path=%s",
+		c.StatementTimeout/time.Millisecond, c.Schema,
+	)
 	return fmt.Sprintf(
 		"user='%s' password='%s' host='%s' port=%s dbname='%s' sslmode='%s' options='%s'",
-		c.User, c.Password, c.Host, c.Port, c.Name, c.SSLMode, timeoutOption,
+		c.User, c.Password, c.Host, c.Port, c.Name, c.SSLMode, options,
 	)
 }
 
@@ -100,6 +104,7 @@ func (c *DBConfig) URL() *url.URL {
 
 	q := url.Values{}
 	q.Set("sslmode", c.SSLMode)
+	q.Set("search_path", c.Schema)
 
 	if strings.HasPrefix(c.Host, "/") {
 		// Unix socket (eg Cloud SQL: /cloudsql/proj:region:inst)
