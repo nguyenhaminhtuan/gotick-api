@@ -132,6 +132,7 @@ jobs:
 
   changes:
     name: Changed images
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -144,12 +145,12 @@ jobs:
       - id: changed
         uses: ./.github/actions/changed-images
         with:
-          force: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/') }}
+          force: ${{ github.event_name == 'schedule' || startsWith(github.ref, 'refs/tags/') }}
 
   images:
     name: Images
     needs: changes
-    if: needs.changes.outputs.images != '[]'
+    if: ${{ !cancelled() && (needs.changes.result == 'skipped' || (needs.changes.result == 'success' && needs.changes.outputs.images != '[]')) }}
     uses: ./.github/workflows/build.yaml
     permissions:
       contents: read
@@ -157,5 +158,5 @@ jobs:
       # Unused here: push is false.
       id-token: write
     with:
-      images: ${{ needs.changes.outputs.images }}
+      images: ${{ needs.changes.outputs.images || '["api","migrate","docs"]' }}
       push: false
