@@ -46,4 +46,6 @@ module "database" {
   database_flags = {
     "cloudsql.iam_authentication" = "on"
   }
+
+  query_insights = {}
 }

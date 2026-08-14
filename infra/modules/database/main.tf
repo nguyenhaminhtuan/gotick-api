@@ -139,6 +139,18 @@ resource "google_sql_database_instance" "this" {
       }
     }
 
+    dynamic "insights_config" {
+      for_each = var.query_insights == null ? [] : [var.query_insights]
+
+      content {
+        query_insights_enabled  = true
+        query_plans_per_minute  = insights_config.value.query_plans_per_minute
+        query_string_length     = insights_config.value.query_string_length
+        record_application_tags = insights_config.value.record_application_tags
+        record_client_address   = insights_config.value.record_client_address
+      }
+    }
+
     dynamic "database_flags" {
       for_each = var.database_flags
 
