@@ -1,6 +1,6 @@
 module gotick
 
-go 1.26.5
+go 1.26.6
 
 require (
 	firebase.google.com/go/v4 v4.21.0
