@@ -3,7 +3,9 @@ ARG GOOSE_VERSION=v3.27.0
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
     CGO_ENABLED=0 GOOS=linux \
-    go install github.com/pressly/goose/v3/cmd/goose@${GOOSE_VERSION}
+    go install -trimpath -ldflags="-s -w" \
+    -tags="no_clickhouse no_libsql no_mssql no_mysql no_sqlite3 no_vertica no_ydb" \
+    github.com/pressly/goose/v3/cmd/goose@${GOOSE_VERSION}
 
 FROM alpine:3.22 AS prod
 COPY --from=build /go/bin/goose /usr/local/bin/goose
