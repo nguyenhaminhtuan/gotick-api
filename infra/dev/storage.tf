@@ -22,6 +22,9 @@ module "registry" {
   region        = var.region
   repository_id = "containers"
 
+  tagged_keep_count       = 5
+  untagged_retention_days = 7
+
   reader_members = [local.sa_member["gha-deployer"]]
   writer_members = [local.sa_member["gha-deployer"]]
 }

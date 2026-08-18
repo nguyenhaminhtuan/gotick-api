@@ -9,6 +9,8 @@ locals {
   load_balancer   = "lb-${local.env_code}-main"
   bucket_prefix   = "bkt-${var.app_name}-${local.env_code}"
 
+  edge = local.load_balancer
+
   psa_range_address       = "10.20.0.0"
   psa_range_prefix_length = 16
 

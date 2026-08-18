@@ -46,27 +46,66 @@ resource "postgresql_role" "app" {
   password_wo_version = local.db_password_version.app
 }
 
-resource "postgresql_schema" "app" {
+resource "postgresql_grant_role" "db_admin_migrate" {
   count = local.db_provision
+
+  role       = "sa-db-admin@${var.project_id}.iam"
+  grant_role = postgresql_role.migrate[0].name
+}
+
+module "app_schema" {
+  source = "../modules/postgres-schema"
+  count  = local.db_provision
 
   name     = local.db_schema
   database = local.db_name
   owner    = postgresql_role.migrate[0].name
 
-  if_not_exists = true
-  drop_cascade  = false
+  # Dev is rebuilt rather than restored
+  drop_cascade = true
+
+  grants = {
+    app_schema = {
+      role        = postgresql_role.app[0].name
+      object_type = "schema"
+      privileges  = ["USAGE"]
+    }
+
+    app_tables = {
+      role        = postgresql_role.app[0].name
+      object_type = "table"
+      privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    }
+
+    app_sequences = {
+      role        = postgresql_role.app[0].name
+      object_type = "sequence"
+      privileges  = ["USAGE", "SELECT"]
+    }
+  }
+
+  default_privileges = {
+    app_tables = {
+      role        = postgresql_role.app[0].name
+      owner       = postgresql_role.migrate[0].name
+      object_type = "table"
+      privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    }
+
+    app_sequences = {
+      role        = postgresql_role.app[0].name
+      owner       = postgresql_role.migrate[0].name
+      object_type = "sequence"
+      privileges  = ["USAGE", "SELECT"]
+    }
+  }
+
+  # Not decoration: the membership has to exist before any grant here is made,
+  # and has to outlive every one of them on the way down.
+  depends_on = [postgresql_grant_role.db_admin_migrate]
 }
 
-resource "postgresql_grant" "migrate_schema" {
-  count = local.db_provision
-
-  role        = postgresql_role.migrate[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "schema"
-  privileges  = ["USAGE", "CREATE"]
-}
-
+# Stays out here because it grants on public, not on the schema the module owns.
 resource "postgresql_grant" "migrate_public_schema" {
   count = local.db_provision
 
@@ -75,58 +114,4 @@ resource "postgresql_grant" "migrate_public_schema" {
   schema      = "public"
   object_type = "schema"
   privileges  = ["USAGE", "CREATE"]
-}
-
-resource "postgresql_grant" "app_schema" {
-  count = local.db_provision
-
-  role        = postgresql_role.app[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "schema"
-  privileges  = ["USAGE"]
-}
-
-resource "postgresql_grant" "app_tables" {
-  count = local.db_provision
-
-  role        = postgresql_role.app[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-}
-
-resource "postgresql_grant" "app_sequences" {
-  count = local.db_provision
-
-  role        = postgresql_role.app[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "sequence"
-  privileges  = ["USAGE", "SELECT"]
-}
-
-resource "postgresql_default_privileges" "app_tables" {
-  count = local.db_provision
-
-  role     = postgresql_role.app[0].name
-  database = local.db_name
-  schema   = postgresql_schema.app[0].name
-  owner    = postgresql_role.migrate[0].name
-
-  object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-}
-
-resource "postgresql_default_privileges" "app_sequences" {
-  count = local.db_provision
-
-  role     = postgresql_role.app[0].name
-  database = local.db_name
-  schema   = postgresql_schema.app[0].name
-  owner    = postgresql_role.migrate[0].name
-
-  object_type = "sequence"
-  privileges  = ["USAGE", "SELECT"]
 }

@@ -90,23 +90,30 @@ variable "iap" {
   sensitive = true
 }
 
-variable "certificate_domains" {
+variable "certificate_map_id" {
   description = <<-EOT
-    Names on the managed certificate. A wildcard covers one label, so
-    *.example.com does not answer for a.b.example.com and that name needs its
-    own entry.
+    Certificate map covering every host this load balancer answers on, from the
+    certificate module.
 
-    The DNS authorizations are derived from this list rather than given
-    separately, since a name authorized nowhere leaves the certificate stuck in
-    provisioning.
+    Held outside this module on purpose: the certificate validates over DNS
+    rather than over the proxy, so it survives the load balancer being torn down
+    and the domain needs no reconfiguring when one is built again.
   EOT
 
-  type = list(string)
+  type = string
+}
 
-  validation {
-    condition     = length(var.certificate_domains) > 0
-    error_message = "At least one domain is required."
-  }
+variable "ip_address" {
+  description = <<-EOT
+    Id of the reserved global address the forwarding rules answer on, which is
+    what the A records point at.
+
+    Reserved by the caller rather than here for the same reason as the
+    certificate: releasing it on teardown would hand back a different address
+    and every A record would have to be rewritten.
+  EOT
+
+  type = string
 }
 
 variable "keep_alive_timeout" {

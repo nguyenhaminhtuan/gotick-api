@@ -1,6 +1,6 @@
-output "load_balancer_ip_address" {
+output "ip_address" {
   description = "A record for <domain>, api.<domain> and *.preview.<domain>."
-  value       = module.load_balancer.ip_address
+  value       = google_compute_global_address.edge.address
 }
 
 output "db_private_ip" {
@@ -15,5 +15,5 @@ output "bastion_zone" {
 
 output "dns_authorization_records" {
   description = "CNAMEs to create before the certificate can be issued. It stays in provisioning until each one resolves."
-  value       = module.load_balancer.dns_authorization_records
+  value       = module.certificate.dns_authorization_records
 }
