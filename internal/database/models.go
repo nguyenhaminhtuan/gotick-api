@@ -12,14 +12,17 @@ import (
 )
 
 type Account struct {
-	ID          uuid.UUID
-	FullName    string
-	Email       string
-	Avatar      string
-	Status      string
-	SuspendedAt *time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID             uuid.UUID
+	FullName       string
+	Email          string
+	Avatar         string
+	Status         string
+	SuspendedAt    *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	FirebaseUid    string
+	Phone          string
+	PhoneChangedAt time.Time
 }
 
 type Asset struct {
@@ -28,17 +31,17 @@ type Asset struct {
 	Status      string
 	ContentType string
 	SizeBytes   pgtype.Int8
-	Checksum    pgtype.Text
+	Checksum    *string
 	CreatedAt   time.Time
 	CommittedAt *time.Time
 }
 
 type Category struct {
-	ID           int16
+	ID           int64
 	Name         string
 	Slug         string
-	Icon         pgtype.Text
-	DisplayOrder int16
+	Icon         *string
+	DisplayOrder int64
 	Status       string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
@@ -47,16 +50,16 @@ type Category struct {
 type City struct {
 	Code       string
 	Name       string
-	NameEn     pgtype.Text
+	NameEn     *string
 	FullName   string
-	FullNameEn pgtype.Text
+	FullNameEn *string
 	Status     string
 }
 
 type Event struct {
 	ID          uuid.UUID
 	OrganizerID uuid.UUID
-	CategoryID  pgtype.Int2
+	CategoryID  pgtype.Int8
 	Name        string
 	Slug        string
 	Description string
@@ -78,7 +81,7 @@ type Occurrence struct {
 	EndTime            time.Time
 	VenueName          string
 	VenueAddress       string
-	VenueCityCode      pgtype.Text
+	VenueCityCode      *string
 	Status             string
 	WaitingRoomEnabled bool
 	CanceledAt         *time.Time
@@ -101,7 +104,7 @@ type OrderItem struct {
 	ID               uuid.UUID
 	OrderID          uuid.UUID
 	TicketCategoryID uuid.UUID
-	Quantity         int32
+	Quantity         int64
 	UnitPrice        int64
 	CreatedAt        time.Time
 	UpdatedAt        time.Time
@@ -153,7 +156,7 @@ type SalePhase struct {
 	Name              string
 	StartTime         time.Time
 	EndTime           time.Time
-	MaxBuyPerCustomer int32
+	MaxBuyPerCustomer int64
 	Status            string
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
@@ -183,10 +186,10 @@ type TicketCategory struct {
 	Name              string
 	Zone              string
 	Price             int64
-	Quantity          int32
-	Priority          int32
+	Quantity          int64
+	Priority          int64
 	Metadata          []byte
-	MaxBuyPerCustomer int32
+	MaxBuyPerCustomer int64
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 }
