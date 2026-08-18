@@ -1,0 +1,20 @@
+{
+  "emailPrivacyConfig": {
+    "enableImprovedEmailPrivacy": true
+  },
+  "passwordPolicyConfig": {
+    "passwordPolicyEnforcementState": "ENFORCE",
+    "forceUpgradeOnSignin": false,
+    "passwordPolicyVersions": [
+      {
+        "customStrengthOptions": {
+          "minPasswordLength": 10,
+          "containsLowercaseCharacter": true,
+          "containsUppercaseCharacter": true,
+          "containsNumericCharacter": true,
+          "containsNonAlphanumericCharacter": false
+        }
+      }
+    ]
+  }
+}
