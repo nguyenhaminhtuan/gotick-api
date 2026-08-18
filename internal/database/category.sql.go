@@ -7,8 +7,6 @@ package database
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getCategories = `-- name: GetCategories :many
@@ -55,8 +53,8 @@ VALUES ($1, $2, $3, $4)
 type InsertCategoryParams struct {
 	Name         string
 	Slug         string
-	Icon         pgtype.Text
-	DisplayOrder int16
+	Icon         *string
+	DisplayOrder int64
 }
 
 func (q *Queries) InsertCategory(ctx context.Context, arg InsertCategoryParams) (int64, error) {

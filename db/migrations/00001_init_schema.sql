@@ -1,4 +1,7 @@
 -- +goose Up
+SET LOCAL lock_timeout = '5s';
+SET LOCAL statement_timeout = '30s';
+
 CREATE TABLE IF NOT EXISTS "accounts" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "full_name" text NOT NULL,
@@ -66,11 +69,11 @@ CREATE TABLE IF NOT EXISTS "platform_staff" (
 );
 
 CREATE TABLE IF NOT EXISTS "categories" (
-    "id" smallint GENERATED ALWAYS AS IDENTITY,
+    "id" bigint GENERATED ALWAYS AS IDENTITY,
     "name" text NOT NULL,
-    "slug" varchar(60) NOT NULL,
+    "slug" text NOT NULL CHECK (length(slug) <= 60),
     "icon" text,
-    "display_order" smallint NOT NULL DEFAULT 0,
+    "display_order" bigint NOT NULL DEFAULT 0,
     "status" text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
     "created_at" timestamptz NOT NULL DEFAULT now(),
     "updated_at" timestamptz NOT NULL DEFAULT now(),
@@ -79,7 +82,7 @@ CREATE TABLE IF NOT EXISTS "categories" (
 );
 
 CREATE TABLE IF NOT EXISTS "cities" (
-    "code" varchar(20) NOT NULL,
+    "code" text NOT NULL CHECK (length(code) <= 20),
     "name" text NOT NULL,
     "name_en" text,
     "full_name" text NOT NULL,
@@ -91,9 +94,9 @@ CREATE TABLE IF NOT EXISTS "cities" (
 CREATE TABLE IF NOT EXISTS "events" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "organizer_id" uuid NOT NULL,
-    "category_id" smallint,
+    "category_id" bigint,
     "name" text NOT NULL,
-    "slug" varchar(60) NOT NULL,
+    "slug" text NOT NULL CHECK (length(slug) <= 60),
     "description" text NOT NULL,
     "image" text NOT NULL,
     "status" text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'closed')),
@@ -121,7 +124,7 @@ CREATE TABLE IF NOT EXISTS "occurrences" (
     "end_time" timestamptz NOT NULL,
     "venue_name" text NOT NULL,
     "venue_address" text NOT NULL,
-    "venue_city_code" varchar(20) NULL,
+    "venue_city_code" text NULL CHECK (length(venue_city_code) <= 20),
     "status" text NOT NULL DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'canceled', 'postponed')),
     "waiting_room_enabled" boolean NOT NULL DEFAULT false,
     "canceled_at" timestamptz,
@@ -140,10 +143,10 @@ CREATE TABLE IF NOT EXISTS "ticket_categories" (
     "name" text NOT NULL,
     "zone" text NOT NULL DEFAULT '',
     "price" bigint NOT NULL,
-    "quantity" int NOT NULL,
-    "priority" int NOT NULL,
+    "quantity" bigint NOT NULL,
+    "priority" bigint NOT NULL,
     "metadata" jsonb NOT NULL DEFAULT '{}',
-    "max_buy_per_customer" int NOT NULL,
+    "max_buy_per_customer" bigint NOT NULL,
     "created_at" timestamptz NOT NULL DEFAULT now(),
     "updated_at" timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY ("id"),
@@ -158,7 +161,7 @@ CREATE TABLE IF NOT EXISTS "sale_phases" (
     "name" text NOT NULL,
     "start_time" timestamptz NOT NULL,
     "end_time" timestamptz NOT NULL,
-    "max_buy_per_customer" int NOT NULL,
+    "max_buy_per_customer" bigint NOT NULL,
     "status" text NOT NULL DEFAULT 'coming_soon' CHECK (status IN ('coming_soon', 'on_sale', 'suspended', 'ended', 'canceled')),
     "created_at" timestamptz NOT NULL DEFAULT now(),
     "updated_at" timestamptz NOT NULL DEFAULT now(),
@@ -200,7 +203,7 @@ CREATE TABLE IF NOT EXISTS "order_items" (
     "id" uuid NOT NULL DEFAULT uuidv7(),
     "order_id" uuid NOT NULL,
     "ticket_category_id" uuid NOT NULL,
-    "quantity" int NOT NULL CHECK (quantity > 0),
+    "quantity" bigint NOT NULL CHECK (quantity > 0),
     "unit_price" bigint NOT NULL CHECK (unit_price >= 0),
     "created_at" timestamptz NOT NULL DEFAULT now(),
     "updated_at" timestamptz NOT NULL DEFAULT now(),

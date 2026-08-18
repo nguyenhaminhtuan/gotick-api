@@ -1,11 +1,11 @@
-name: Setup Redocly
-description: Install the Redocly CLI and put it on PATH, optionally pinning Node first.
+name: Setup Squawk
+description: Install the Squawk CLI and put it on PATH, optionally pinning Node first.
 
 inputs:
   version:
-    description: Redocly CLI version to install.
+    description: Squawk CLI version to install.
     required: false
-    default: '2.40.0'
+    default: '2.59.0'
   node-version:
     required: false
     default: '24'
@@ -19,6 +19,6 @@ runs:
 
     - id: install
       shell: bash
-      run: npm install -g "@redocly/cli@${VERSION}"
+      run: npm install -g "squawk-cli@$VERSION"
       env:
         VERSION: ${{ inputs.version }}

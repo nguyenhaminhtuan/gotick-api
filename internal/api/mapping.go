@@ -2,8 +2,6 @@ package api
 
 import (
 	"gotick/internal/oas"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func mapSlice[S ~[]R, T, R any](in []T, f func(*T) *R) S {
@@ -14,9 +12,9 @@ func mapSlice[S ~[]R, T, R any](in []T, f func(*T) *R) S {
 	return out
 }
 
-func toOptString(t pgtype.Text) oas.OptString {
-	if !t.Valid {
+func toOptString(t *string) oas.OptString {
+	if t == nil {
 		return oas.OptString{}
 	}
-	return oas.NewOptString(t.String)
+	return oas.NewOptString(*t)
 }
