@@ -46,25 +46,49 @@ resource "postgresql_role" "app" {
   password_wo_version = local.db_password_version.app
 }
 
-resource "postgresql_schema" "app" {
-  count = local.db_provision
+module "app_schema" {
+  source = "../modules/postgres-schema"
+  count  = local.db_provision
 
   name     = local.db_schema
   database = local.db_name
   owner    = postgresql_role.migrate[0].name
 
-  if_not_exists = true
-  drop_cascade  = false
-}
+  grants = {
+    app_schema = {
+      role        = postgresql_role.app[0].name
+      object_type = "schema"
+      privileges  = ["USAGE"]
+    }
 
-resource "postgresql_grant" "migrate_schema" {
-  count = local.db_provision
+    app_tables = {
+      role        = postgresql_role.app[0].name
+      object_type = "table"
+      privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    }
 
-  role        = postgresql_role.migrate[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "schema"
-  privileges  = ["USAGE", "CREATE"]
+    app_sequences = {
+      role        = postgresql_role.app[0].name
+      object_type = "sequence"
+      privileges  = ["USAGE", "SELECT"]
+    }
+  }
+
+  default_privileges = {
+    app_tables = {
+      role        = postgresql_role.app[0].name
+      owner       = postgresql_role.migrate[0].name
+      object_type = "table"
+      privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+    }
+
+    app_sequences = {
+      role        = postgresql_role.app[0].name
+      owner       = postgresql_role.migrate[0].name
+      object_type = "sequence"
+      privileges  = ["USAGE", "SELECT"]
+    }
+  }
 }
 
 resource "postgresql_grant" "migrate_public_schema" {
@@ -77,56 +101,3 @@ resource "postgresql_grant" "migrate_public_schema" {
   privileges  = ["USAGE", "CREATE"]
 }
 
-resource "postgresql_grant" "app_schema" {
-  count = local.db_provision
-
-  role        = postgresql_role.app[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "schema"
-  privileges  = ["USAGE"]
-}
-
-resource "postgresql_grant" "app_tables" {
-  count = local.db_provision
-
-  role        = postgresql_role.app[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-}
-
-resource "postgresql_grant" "app_sequences" {
-  count = local.db_provision
-
-  role        = postgresql_role.app[0].name
-  database    = local.db_name
-  schema      = postgresql_schema.app[0].name
-  object_type = "sequence"
-  privileges  = ["USAGE", "SELECT"]
-}
-
-resource "postgresql_default_privileges" "app_tables" {
-  count = local.db_provision
-
-  role     = postgresql_role.app[0].name
-  database = local.db_name
-  schema   = postgresql_schema.app[0].name
-  owner    = postgresql_role.migrate[0].name
-
-  object_type = "table"
-  privileges  = ["SELECT", "INSERT", "UPDATE", "DELETE"]
-}
-
-resource "postgresql_default_privileges" "app_sequences" {
-  count = local.db_provision
-
-  role     = postgresql_role.app[0].name
-  database = local.db_name
-  schema   = postgresql_schema.app[0].name
-  owner    = postgresql_role.migrate[0].name
-
-  object_type = "sequence"
-  privileges  = ["USAGE", "SELECT"]
-}

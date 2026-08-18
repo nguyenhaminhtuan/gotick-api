@@ -24,8 +24,6 @@ locals {
   default_backend = one([for k, b in var.backends : k if length(b.hosts) == 0])
   host_backends   = { for k, b in var.backends : k => b if length(b.hosts) > 0 }
 
-  authorization_domains = toset([for d in var.certificate_domains : trimprefix(d, "*.")])
-
   # Resource names cannot hold a dot or an asterisk.
   iap_members = {
     for pair in flatten([
@@ -34,18 +32,6 @@ locals {
       ]
     ]) : "${pair.backend}/${pair.member}" => pair
   }
-
-  certificate_hostnames = {
-    for d in var.certificate_domains :
-    replace(replace(d, "*.", "wildcard-"), ".", "-") => d
-  }
-}
-
-resource "google_compute_global_address" "this" {
-  project      = var.project_id
-  name         = var.name
-  address_type = "EXTERNAL"
-  ip_version   = "IPV4"
 }
 
 resource "google_compute_region_network_endpoint_group" "this" {
@@ -101,41 +87,6 @@ resource "google_iap_web_backend_service_iam_member" "accessor" {
   member              = each.value.member
 }
 
-resource "google_certificate_manager_dns_authorization" "this" {
-  for_each = local.authorization_domains
-
-  project = var.project_id
-  name    = "${var.name}-${replace(each.value, ".", "-")}"
-  domain  = each.value
-
-  type = "PER_PROJECT_RECORD"
-}
-
-resource "google_certificate_manager_certificate" "this" {
-  project = var.project_id
-  name    = var.name
-
-  managed {
-    domains            = var.certificate_domains
-    dns_authorizations = [for a in google_certificate_manager_dns_authorization.this : a.id]
-  }
-}
-
-resource "google_certificate_manager_certificate_map" "this" {
-  project = var.project_id
-  name    = var.name
-}
-
-resource "google_certificate_manager_certificate_map_entry" "this" {
-  for_each = local.certificate_hostnames
-
-  project      = var.project_id
-  name         = "${var.name}-${each.key}"
-  map          = google_certificate_manager_certificate_map.this.name
-  certificates = [google_certificate_manager_certificate.this.id]
-  hostname     = each.value
-}
-
 resource "google_compute_url_map" "https" {
   project         = var.project_id
   name            = var.name
@@ -165,7 +116,7 @@ resource "google_compute_target_https_proxy" "this" {
   name    = var.name
   url_map = google_compute_url_map.https.id
 
-  certificate_map             = "//certificatemanager.googleapis.com/${google_certificate_manager_certificate_map.this.id}"
+  certificate_map             = "//certificatemanager.googleapis.com/${var.certificate_map_id}"
   http_keep_alive_timeout_sec = var.keep_alive_timeout
 }
 
@@ -174,7 +125,7 @@ resource "google_compute_global_forwarding_rule" "https" {
   name                  = var.name
   load_balancing_scheme = "EXTERNAL_MANAGED"
   network_tier          = "PREMIUM"
-  ip_address            = google_compute_global_address.this.id
+  ip_address            = var.ip_address
   target                = google_compute_target_https_proxy.this.id
   port_range            = "443"
 }
@@ -207,7 +158,7 @@ resource "google_compute_global_forwarding_rule" "http_redirect" {
   name                  = "${var.name}-http-redirect"
   load_balancing_scheme = "EXTERNAL_MANAGED"
   network_tier          = "PREMIUM"
-  ip_address            = google_compute_global_address.this.id
+  ip_address            = var.ip_address
   target                = google_compute_target_http_proxy.redirect[0].id
   port_range            = "80"
 }

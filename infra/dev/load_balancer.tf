@@ -1,4 +1,25 @@
+resource "google_compute_global_address" "edge" {
+  project      = var.project_id
+  name         = local.edge
+  address_type = "EXTERNAL"
+  ip_version   = "IPV4"
+}
+
+module "certificate" {
+  source = "../modules/certificate"
+
+  project_id = var.project_id
+  name       = local.edge
+
+  domains = [
+    var.domain,
+    "*.${var.domain}",
+    "*.preview.${var.domain}",
+  ]
+}
+
 module "load_balancer" {
+  count  = 0
   source = "../modules/load-balancer"
 
   project_id = var.project_id
@@ -28,9 +49,7 @@ module "load_balancer" {
     oauth_client_secret = var.iap_oauth_client_secret
   }
 
-  certificate_domains = [
-    var.domain,
-    "*.${var.domain}",
-    "*.preview.${var.domain}",
-  ]
+  certificate_map_id = module.certificate.certificate_map_id
+  ip_address         = google_compute_global_address.edge.id
 }
+

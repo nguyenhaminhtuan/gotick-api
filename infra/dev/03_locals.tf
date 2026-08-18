@@ -9,6 +9,8 @@ locals {
   load_balancer   = "lb-${local.env_code}-main"
   bucket_prefix   = "bkt-${var.app_name}-${local.env_code}"
 
+  edge = local.load_balancer
+
   psa_range_address       = "10.20.0.0"
   psa_range_prefix_length = 16
 
@@ -17,10 +19,11 @@ locals {
   db_provision = var.enable_db_provision ? 1 : 0
   db_name      = "gotick"
   db_schema    = "app"
+
   db_password_version = {
     app      = 1
     migrate  = 1
-    postgres = 1
+    postgres = 2
   }
 
   sa_email = {

@@ -1,3 +1,7 @@
+ephemeral "google_secret_manager_secret_version" "postgres" {
+  secret = module.db_root_password.secret_id
+}
+
 module "database" {
   source = "../modules/database"
 
@@ -15,6 +19,9 @@ module "database" {
   activation_policy = "ALWAYS"
   high_availability = false
 
+  retained_backups       = 3
+  point_in_time_recovery = false
+
   maintenance_window = {
     day          = "tuesday"
     hour         = 20
@@ -31,7 +38,7 @@ module "database" {
   }
 
   user_passwords = {
-    postgres = ephemeral.random_password.db_root.result
+    postgres = ephemeral.google_secret_manager_secret_version.postgres.secret_data
   }
 
   database_flags = {
