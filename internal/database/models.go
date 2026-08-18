@@ -12,17 +12,14 @@ import (
 )
 
 type Account struct {
-	ID             uuid.UUID
-	FullName       string
-	Email          string
-	Avatar         string
-	Status         string
-	SuspendedAt    *time.Time
-	CreatedAt      time.Time
-	UpdatedAt      time.Time
-	FirebaseUid    string
-	Phone          string
-	PhoneChangedAt time.Time
+	ID          uuid.UUID
+	FullName    string
+	Email       string
+	Avatar      string
+	Status      string
+	SuspendedAt *time.Time
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
 }
 
 type Asset struct {
