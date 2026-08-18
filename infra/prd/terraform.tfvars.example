@@ -10,3 +10,10 @@ developers = ["user:<you>@gmail.com"]
 
 # Leave on. Off lets terraform destroy the instance, the buckets and the secrets.
 # deletion_protection = false
+
+# Google sign-in. APIs & Services > Credentials > OAuth client ID > Web
+# application, with https://<project-id>.firebaseapp.com/__/auth/handler as an
+# authorized redirect URI. Console only, Terraform cannot create the client.
+# Leave both unset to keep Google sign-in off.
+# identity_google_oauth_client_id     = "<client-id>.apps.googleusercontent.com"
+# identity_google_oauth_client_secret = "<client-secret>"

@@ -67,6 +67,11 @@ variable "deletion_policy" {
   }
 }
 
+variable "labels" {
+  type    = map(string)
+  default = {}
+}
+
 variable "services" {
   description = "APIs enabled on the project."
   type        = list(string)
@@ -74,7 +79,7 @@ variable "services" {
 }
 
 variable "enable_firebase" {
-  description = "Turns the project into a Firebase project and enables firebase.googleapis.com alongside services."
+  description = "Turns the project into a Firebase project: enables firebase.googleapis.com alongside services, and labels the project firebase = \"enabled\" the way the console does."
   type        = bool
   default     = false
 }

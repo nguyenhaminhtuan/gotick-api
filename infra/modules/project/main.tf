@@ -32,6 +32,7 @@ resource "google_project" "this" {
 
   auto_create_network = var.auto_create_network
   deletion_policy     = var.deletion_policy
+  labels              = local.labels
 }
 
 locals {
@@ -39,6 +40,11 @@ locals {
     var.services,
     var.enable_firebase ? ["firebase.googleapis.com"] : [],
   ))
+
+  labels = merge(
+    var.labels,
+    var.enable_firebase ? { firebase = "enabled" } : {},
+  )
 }
 
 resource "google_project_service" "this" {

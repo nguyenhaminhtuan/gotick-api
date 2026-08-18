@@ -79,6 +79,7 @@ locals {
     "roles/cloudscheduler.admin",
     "roles/cloudsql.admin",
     "roles/secretmanager.admin",
+    "roles/identityplatform.admin",
   ]
 
   env = {

@@ -40,3 +40,15 @@ variable "developers" {
     error_message = "Each member needs its type prefix, for example user:you@gmail.com."
   }
 }
+
+variable "identity_google_oauth_client_id" {
+  description = "Google sign-in client. Null keeps the provider off."
+  type        = string
+  default     = null
+}
+
+variable "identity_google_oauth_client_secret" {
+  type      = string
+  sensitive = true
+  default   = null
+}

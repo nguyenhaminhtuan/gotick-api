@@ -48,3 +48,15 @@ variable "iap_oauth_client_secret" {
   type      = string
   sensitive = true
 }
+
+variable "identity_google_oauth_client_id" {
+  description = "Google sign-in client. Null keeps the provider off."
+  type        = string
+  default     = null
+}
+
+variable "identity_google_oauth_client_secret" {
+  type      = string
+  sensitive = true
+  default   = null
+}
