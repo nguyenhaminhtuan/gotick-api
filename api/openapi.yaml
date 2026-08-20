@@ -47,6 +47,9 @@ tags:
     x-displayName: Organizer Applications
     description: The authenticated account's requests to become an organizer.
 
+  - name: Organizer Members
+    x-displayName: Members
+    description: People who can act on behalf of an organizer.
   - name: Organizer Events
     x-displayName: Events
     description: Events managed by the caller's organizer, including publishing.
@@ -60,6 +63,9 @@ tags:
     x-displayName: Sale Phases
     description: Selling windows and their lifecycle transitions.
 
+  - name: Admin Staff
+    x-displayName: Staff
+    description: Accounts allowed to operate the platform.
   - name: Admin Organizer Applications
     x-displayName: Organizer Applications
     description: Review queue for accounts applying to become organizers.
@@ -90,12 +96,14 @@ x-tagGroups:
       - My Organizer Applications
   - name: Organizer
     tags:
+      - Organizer Members
       - Organizer Events
       - Organizer Occurrences
       - Organizer Ticket Categories
       - Organizer Sale Phases
   - name: Admin
     tags:
+      - Admin Staff
       - Admin Organizer Applications
       - Admin Organizers
       - Admin Cities
@@ -103,6 +111,10 @@ x-tagGroups:
 components:
   securitySchemes:
     bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    adminAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
@@ -150,8 +162,12 @@ paths:
   /me/organizer-applications/{organizerApplicationId}/resubmit:
     $ref: ./paths/me_organizer-applications_{organizerApplicationId}_resubmit.yaml
   # Organizer
-  /org/events:
-    $ref: ./paths/org_events.yaml
+  /org/organizers/{organizerId}/members:
+    $ref: ./paths/org_organizers_{organizerId}_members.yaml
+  /org/organizers/{organizerId}/members/{accountId}:
+    $ref: ./paths/org_organizers_{organizerId}_members_{accountId}.yaml
+  /org/organizers/{organizerId}/events:
+    $ref: ./paths/org_organizers_{organizerId}_events.yaml
   /org/events/{eventId}:
     $ref: ./paths/org_events_{eventId}.yaml
   /org/events/{eventId}/publish:
@@ -160,31 +176,33 @@ paths:
     $ref: ./paths/org_events_{eventId}_close.yaml
   /org/events/{eventId}/occurrences:
     $ref: ./paths/org_events_{eventId}_occurrences.yaml
-  /org/events/{eventId}/occurrences/{occurrenceId}:
-    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}.yaml
-  /org/events/{eventId}/occurrences/{occurrenceId}/cancel:
-    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}_cancel.yaml
-  /org/events/{eventId}/occurrences/{occurrenceId}/postpone:
-    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}_postpone.yaml
-  /org/events/{eventId}/occurrences/{occurrenceId}/reschedule:
-    $ref: ./paths/org_events_{eventId}_occurrences_{occurrenceId}_reschedule.yaml
+  /org/occurrences/{occurrenceId}:
+    $ref: ./paths/org_occurrences_{occurrenceId}.yaml
+  /org/occurrences/{occurrenceId}/cancel:
+    $ref: ./paths/org_occurrences_{occurrenceId}_cancel.yaml
+  /org/occurrences/{occurrenceId}/postpone:
+    $ref: ./paths/org_occurrences_{occurrenceId}_postpone.yaml
+  /org/occurrences/{occurrenceId}/reschedule:
+    $ref: ./paths/org_occurrences_{occurrenceId}_reschedule.yaml
   /org/occurrences/{occurrenceId}/ticket-categories:
     $ref: ./paths/org_occurrences_{occurrenceId}_ticket-categories.yaml
-  /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}:
-    $ref: ./paths/org_occurrences_{occurrenceId}_ticket-categories_{ticketCategoryId}.yaml
+  /org/ticket-categories/{ticketCategoryId}:
+    $ref: ./paths/org_ticket-categories_{ticketCategoryId}.yaml
   /org/occurrences/{occurrenceId}/sale-phases:
     $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases.yaml
-  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}:
-    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}.yaml
-  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start:
-    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_start.yaml
-  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend:
-    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_suspend.yaml
-  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end:
-    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_end.yaml
-  /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel:
-    $ref: ./paths/org_occurrences_{occurrenceId}_sale-phases_{salePhaseId}_cancel.yaml
+  /org/sale-phases/{salePhaseId}:
+    $ref: ./paths/org_sale-phases_{salePhaseId}.yaml
+  /org/sale-phases/{salePhaseId}/start:
+    $ref: ./paths/org_sale-phases_{salePhaseId}_start.yaml
+  /org/sale-phases/{salePhaseId}/suspend:
+    $ref: ./paths/org_sale-phases_{salePhaseId}_suspend.yaml
+  /org/sale-phases/{salePhaseId}/end:
+    $ref: ./paths/org_sale-phases_{salePhaseId}_end.yaml
+  /org/sale-phases/{salePhaseId}/cancel:
+    $ref: ./paths/org_sale-phases_{salePhaseId}_cancel.yaml
   # Admin
+  /admin/staff:
+    $ref: ./paths/admin_staff.yaml
   /admin/organizer-applications:
     $ref: ./paths/admin_organizer-applications.yaml
   /admin/organizer-applications/{organizerApplicationId}/approve:

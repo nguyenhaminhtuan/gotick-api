@@ -26,12 +26,14 @@ type Invoker interface {
 	CategoriesInvoker
 	CitiesInvoker
 	EventsInvoker
+	MembersInvoker
 	OccurrencesInvoker
 	OrdersInvoker
 	OrganizerApplicationsInvoker
 	OrganizersInvoker
 	ProfileInvoker
 	SalePhasesInvoker
+	StaffInvoker
 	TicketCategoriesInvoker
 	TicketsInvoker
 }
@@ -51,7 +53,7 @@ type CategoriesInvoker interface {
 	// Create a category.
 	//
 	// POST /admin/categories
-	CreateAdminCategory(ctx context.Context) (CreateAdminCategoryRes, error)
+	CreateAdminCategory(ctx context.Context, request *CreateCategoryRequest) (CreateAdminCategoryRes, error)
 	// DeactivateAdminCategory invokes deactivateAdminCategory operation.
 	//
 	// Deactivate a category.
@@ -78,10 +80,10 @@ type CategoriesInvoker interface {
 	ListPublicCategories(ctx context.Context) (ListPublicCategoriesRes, error)
 	// UpdateAdminCategory invokes updateAdminCategory operation.
 	//
-	// Update a category.
+	// Replace a category.
 	//
-	// PATCH /admin/categories/{categoryId}
-	UpdateAdminCategory(ctx context.Context, params UpdateAdminCategoryParams) (UpdateAdminCategoryRes, error)
+	// PUT /admin/categories/{categoryId}
+	UpdateAdminCategory(ctx context.Context, request *UpdateCategoryRequest, params UpdateAdminCategoryParams) (UpdateAdminCategoryRes, error)
 }
 
 // CitiesInvoker invokes operations described by OpenAPI v3 specification.
@@ -146,8 +148,8 @@ type EventsInvoker interface {
 	//
 	// Create an event.
 	//
-	// POST /org/events
-	CreateOrgEvent(ctx context.Context) (CreateOrgEventRes, error)
+	// POST /org/organizers/{organizerId}/events
+	CreateOrgEvent(ctx context.Context, params CreateOrgEventParams) (CreateOrgEventRes, error)
 	// GetOrgEvent invokes getOrgEvent operation.
 	//
 	// Get an event.
@@ -164,7 +166,7 @@ type EventsInvoker interface {
 	//
 	// List events.
 	//
-	// GET /org/events
+	// GET /org/organizers/{organizerId}/events
 	ListOrgEvents(ctx context.Context, params ListOrgEventsParams) (ListOrgEventsRes, error)
 	// ListPublicEvents invokes listPublicEvents operation.
 	//
@@ -204,6 +206,37 @@ type EventsInvoker interface {
 	UpdateOrgEvent(ctx context.Context, params UpdateOrgEventParams) (UpdateOrgEventRes, error)
 }
 
+// MembersInvoker invokes operations described by OpenAPI v3 specification.
+//
+// x-gen-operation-group: Members
+type MembersInvoker interface {
+	// AddOrgMember invokes addOrgMember operation.
+	//
+	// Adds an existing gotick account to the organizer, found by the email it registered with. Only owners
+	// may change the member list.
+	//
+	// POST /org/organizers/{organizerId}/members
+	AddOrgMember(ctx context.Context, request *AddOrganizerMemberRequest, params AddOrgMemberParams) (AddOrgMemberRes, error)
+	// ListOrgMembers invokes listOrgMembers operation.
+	//
+	// List members.
+	//
+	// GET /org/organizers/{organizerId}/members
+	ListOrgMembers(ctx context.Context, params ListOrgMembersParams) (ListOrgMembersRes, error)
+	// RemoveOrgMember invokes removeOrgMember operation.
+	//
+	// Removing the last owner is refused: an organizer without an owner has nobody who can manage it.
+	//
+	// DELETE /org/organizers/{organizerId}/members/{accountId}
+	RemoveOrgMember(ctx context.Context, params RemoveOrgMemberParams) (RemoveOrgMemberRes, error)
+	// UpdateOrgMember invokes updateOrgMember operation.
+	//
+	// Change a member's role.
+	//
+	// PATCH /org/organizers/{organizerId}/members/{accountId}
+	UpdateOrgMember(ctx context.Context, request *UpdateOrganizerMemberRequest, params UpdateOrgMemberParams) (UpdateOrgMemberRes, error)
+}
+
 // OccurrencesInvoker invokes operations described by OpenAPI v3 specification.
 //
 // x-gen-operation-group: Occurrences
@@ -212,7 +245,7 @@ type OccurrencesInvoker interface {
 	//
 	// Cancel an occurrence.
 	//
-	// POST /org/events/{eventId}/occurrences/{occurrenceId}/cancel
+	// POST /org/occurrences/{occurrenceId}/cancel
 	CancelOrgOccurrence(ctx context.Context, params CancelOrgOccurrenceParams) (CancelOrgOccurrenceRes, error)
 	// CreateOrgOccurrence invokes createOrgOccurrence operation.
 	//
@@ -224,7 +257,7 @@ type OccurrencesInvoker interface {
 	//
 	// Get an occurrence.
 	//
-	// GET /org/events/{eventId}/occurrences/{occurrenceId}
+	// GET /org/occurrences/{occurrenceId}
 	GetOrgOccurrence(ctx context.Context, params GetOrgOccurrenceParams) (GetOrgOccurrenceRes, error)
 	// ListOrgOccurrences invokes listOrgOccurrences operation.
 	//
@@ -242,19 +275,19 @@ type OccurrencesInvoker interface {
 	//
 	// Postpone an occurrence.
 	//
-	// POST /org/events/{eventId}/occurrences/{occurrenceId}/postpone
+	// POST /org/occurrences/{occurrenceId}/postpone
 	PostponeOrgOccurrence(ctx context.Context, params PostponeOrgOccurrenceParams) (PostponeOrgOccurrenceRes, error)
 	// RescheduleOrgOccurrence invokes rescheduleOrgOccurrence operation.
 	//
 	// Reschedule an occurrence.
 	//
-	// POST /org/events/{eventId}/occurrences/{occurrenceId}/reschedule
+	// POST /org/occurrences/{occurrenceId}/reschedule
 	RescheduleOrgOccurrence(ctx context.Context, params RescheduleOrgOccurrenceParams) (RescheduleOrgOccurrenceRes, error)
 	// UpdateOrgOccurrence invokes updateOrgOccurrence operation.
 	//
 	// Update an occurrence.
 	//
-	// PATCH /org/events/{eventId}/occurrences/{occurrenceId}
+	// PATCH /org/occurrences/{occurrenceId}
 	UpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (UpdateOrgOccurrenceRes, error)
 }
 
@@ -382,6 +415,12 @@ type OrganizersInvoker interface {
 //
 // x-gen-operation-group: Profile
 type ProfileInvoker interface {
+	// CreateMyProfile invokes createMyProfile operation.
+	//
+	// Create my profile.
+	//
+	// POST /me/profile
+	CreateMyProfile(ctx context.Context, request *CreateMyProfileRequest) (CreateMyProfileRes, error)
 	// GetMyProfile invokes getMyProfile operation.
 	//
 	// Get my profile.
@@ -398,7 +437,7 @@ type SalePhasesInvoker interface {
 	//
 	// Cancel a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel
+	// POST /org/sale-phases/{salePhaseId}/cancel
 	CancelOrgSalePhase(ctx context.Context, params CancelOrgSalePhaseParams) (CancelOrgSalePhaseRes, error)
 	// CreateOrgSalePhase invokes createOrgSalePhase operation.
 	//
@@ -410,13 +449,13 @@ type SalePhasesInvoker interface {
 	//
 	// End a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end
+	// POST /org/sale-phases/{salePhaseId}/end
 	EndOrgSalePhase(ctx context.Context, params EndOrgSalePhaseParams) (EndOrgSalePhaseRes, error)
 	// GetOrgSalePhase invokes getOrgSalePhase operation.
 	//
 	// Get a sale phase.
 	//
-	// GET /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+	// GET /org/sale-phases/{salePhaseId}
 	GetOrgSalePhase(ctx context.Context, params GetOrgSalePhaseParams) (GetOrgSalePhaseRes, error)
 	// ListOrgSalePhases invokes listOrgSalePhases operation.
 	//
@@ -434,20 +473,32 @@ type SalePhasesInvoker interface {
 	//
 	// Start a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start
+	// POST /org/sale-phases/{salePhaseId}/start
 	StartOrgSalePhase(ctx context.Context, params StartOrgSalePhaseParams) (StartOrgSalePhaseRes, error)
 	// SuspendOrgSalePhase invokes suspendOrgSalePhase operation.
 	//
 	// Suspend a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend
+	// POST /org/sale-phases/{salePhaseId}/suspend
 	SuspendOrgSalePhase(ctx context.Context, params SuspendOrgSalePhaseParams) (SuspendOrgSalePhaseRes, error)
 	// UpdateOrgSalePhase invokes updateOrgSalePhase operation.
 	//
 	// Update a sale phase.
 	//
-	// PATCH /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+	// PATCH /org/sale-phases/{salePhaseId}
 	UpdateOrgSalePhase(ctx context.Context, params UpdateOrgSalePhaseParams) (UpdateOrgSalePhaseRes, error)
+}
+
+// StaffInvoker invokes operations described by OpenAPI v3 specification.
+//
+// x-gen-operation-group: Staff
+type StaffInvoker interface {
+	// ListAdminStaff invokes listAdminStaff operation.
+	//
+	// List platform staff.
+	//
+	// GET /admin/staff
+	ListAdminStaff(ctx context.Context) (ListAdminStaffRes, error)
 }
 
 // TicketCategoriesInvoker invokes operations described by OpenAPI v3 specification.
@@ -464,7 +515,7 @@ type TicketCategoriesInvoker interface {
 	//
 	// Get a ticket category.
 	//
-	// GET /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+	// GET /org/ticket-categories/{ticketCategoryId}
 	GetOrgTicketCategory(ctx context.Context, params GetOrgTicketCategoryParams) (GetOrgTicketCategoryRes, error)
 	// ListOrgTicketCategories invokes listOrgTicketCategories operation.
 	//
@@ -482,7 +533,7 @@ type TicketCategoriesInvoker interface {
 	//
 	// Update a ticket category.
 	//
-	// PATCH /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+	// PATCH /org/ticket-categories/{ticketCategoryId}
 	UpdateOrgTicketCategory(ctx context.Context, params UpdateOrgTicketCategoryParams) (UpdateOrgTicketCategoryRes, error)
 }
 
@@ -568,7 +619,7 @@ func (c *Client) sendActivateAdminCategory(ctx context.Context, params ActivateA
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.CategoryId))
+			return e.EncodeValue(conv.Int64ToString(params.CategoryId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -591,13 +642,13 @@ func (c *Client) sendActivateAdminCategory(ctx context.Context, params ActivateA
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ActivateAdminCategoryOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ActivateAdminCategoryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -689,13 +740,13 @@ func (c *Client) sendActivateAdminCity(ctx context.Context, params ActivateAdmin
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ActivateAdminCityOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ActivateAdminCityOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -787,7 +838,109 @@ func (c *Client) sendActivateAdminOrganizer(ctx context.Context, params Activate
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ActivateAdminOrganizerOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ActivateAdminOrganizerOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeActivateAdminOrganizerResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// AddOrgMember invokes addOrgMember operation.
+//
+// Adds an existing gotick account to the organizer, found by the email it registered with. Only owners
+// may change the member list.
+//
+// POST /org/organizers/{organizerId}/members
+func (c *Client) AddOrgMember(ctx context.Context, request *AddOrganizerMemberRequest, params AddOrgMemberParams) (AddOrgMemberRes, error) {
+	res, err := c.sendAddOrgMember(ctx, request, params)
+	return res, err
+}
+
+func (c *Client) sendAddOrgMember(ctx context.Context, request *AddOrganizerMemberRequest, params AddOrgMemberParams) (res AddOrgMemberRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/org/organizers/"
+	{
+		// Encode "organizerId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "organizerId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.OrganizerId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeAddOrgMemberRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAuth(ctx, AddOrgMemberOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -828,7 +981,7 @@ func (c *Client) sendActivateAdminOrganizer(ctx context.Context, params Activate
 		_ = body.Close()
 	}()
 
-	result, err := decodeActivateAdminOrganizerResponse(resp)
+	result, err := decodeAddOrgMemberResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -885,13 +1038,13 @@ func (c *Client) sendApproveAdminOrganizerApplication(ctx context.Context, param
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ApproveAdminOrganizerApplicationOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ApproveAdminOrganizerApplicationOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -938,7 +1091,7 @@ func (c *Client) sendApproveAdminOrganizerApplication(ctx context.Context, param
 //
 // Cancel an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/cancel
+// POST /org/occurrences/{occurrenceId}/cancel
 func (c *Client) CancelOrgOccurrence(ctx context.Context, params CancelOrgOccurrenceParams) (CancelOrgOccurrenceRes, error) {
 	res, err := c.sendCancelOrgOccurrence(ctx, params)
 	return res, err
@@ -947,30 +1100,8 @@ func (c *Client) CancelOrgOccurrence(ctx context.Context, params CancelOrgOccurr
 func (c *Client) sendCancelOrgOccurrence(ctx context.Context, params CancelOrgOccurrenceParams) (res CancelOrgOccurrenceRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/events/"
-	{
-		// Encode "eventId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "eventId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.EventId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/occurrences/"
+	var pathParts [3]string
+	pathParts[0] = "/org/occurrences/"
 	{
 		// Encode "occurrenceId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -990,9 +1121,9 @@ func (c *Client) sendCancelOrgOccurrence(ctx context.Context, params CancelOrgOc
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/cancel"
+	pathParts[2] = "/cancel"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -1058,7 +1189,7 @@ func (c *Client) sendCancelOrgOccurrence(ctx context.Context, params CancelOrgOc
 //
 // Cancel a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel
+// POST /org/sale-phases/{salePhaseId}/cancel
 func (c *Client) CancelOrgSalePhase(ctx context.Context, params CancelOrgSalePhaseParams) (CancelOrgSalePhaseRes, error) {
 	res, err := c.sendCancelOrgSalePhase(ctx, params)
 	return res, err
@@ -1067,30 +1198,8 @@ func (c *Client) CancelOrgSalePhase(ctx context.Context, params CancelOrgSalePha
 func (c *Client) sendCancelOrgSalePhase(ctx context.Context, params CancelOrgSalePhaseParams) (res CancelOrgSalePhaseRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/sale-phases/"
+	var pathParts [3]string
+	pathParts[0] = "/org/sale-phases/"
 	{
 		// Encode "salePhaseId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -1110,9 +1219,9 @@ func (c *Client) sendCancelOrgSalePhase(ctx context.Context, params CancelOrgSal
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/cancel"
+	pathParts[2] = "/cancel"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -1277,12 +1386,12 @@ func (c *Client) sendCloseOrgEvent(ctx context.Context, params CloseOrgEventPara
 // Create a category.
 //
 // POST /admin/categories
-func (c *Client) CreateAdminCategory(ctx context.Context) (CreateAdminCategoryRes, error) {
-	res, err := c.sendCreateAdminCategory(ctx)
+func (c *Client) CreateAdminCategory(ctx context.Context, request *CreateCategoryRequest) (CreateAdminCategoryRes, error) {
+	res, err := c.sendCreateAdminCategory(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreateAdminCategory(ctx context.Context) (res CreateAdminCategoryRes, err error) {
+func (c *Client) sendCreateAdminCategory(ctx context.Context, request *CreateCategoryRequest) (res CreateAdminCategoryRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [1]string
@@ -1293,19 +1402,22 @@ func (c *Client) sendCreateAdminCategory(ctx context.Context) (res CreateAdminCa
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
+	if err := encodeCreateAdminCategoryRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
 
 	{
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, CreateAdminCategoryOperation, r); {
+			switch err := c.securityAdminAuth(ctx, CreateAdminCategoryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -1375,13 +1487,13 @@ func (c *Client) sendCreateAdminCity(ctx context.Context) (res CreateAdminCityRe
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, CreateAdminCityOperation, r); {
+			switch err := c.securityAdminAuth(ctx, CreateAdminCityOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -1576,21 +1688,122 @@ func (c *Client) sendCreateMyOrganizerApplication(ctx context.Context) (res Crea
 	return result, nil
 }
 
+// CreateMyProfile invokes createMyProfile operation.
+//
+// Create my profile.
+//
+// POST /me/profile
+func (c *Client) CreateMyProfile(ctx context.Context, request *CreateMyProfileRequest) (CreateMyProfileRes, error) {
+	res, err := c.sendCreateMyProfile(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateMyProfile(ctx context.Context, request *CreateMyProfileRequest) (res CreateMyProfileRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/me/profile"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateMyProfileRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAuth(ctx, CreateMyProfileOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeCreateMyProfileResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // CreateOrgEvent invokes createOrgEvent operation.
 //
 // Create an event.
 //
-// POST /org/events
-func (c *Client) CreateOrgEvent(ctx context.Context) (CreateOrgEventRes, error) {
-	res, err := c.sendCreateOrgEvent(ctx)
+// POST /org/organizers/{organizerId}/events
+func (c *Client) CreateOrgEvent(ctx context.Context, params CreateOrgEventParams) (CreateOrgEventRes, error) {
+	res, err := c.sendCreateOrgEvent(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendCreateOrgEvent(ctx context.Context) (res CreateOrgEventRes, err error) {
+func (c *Client) sendCreateOrgEvent(ctx context.Context, params CreateOrgEventParams) (res CreateOrgEventRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/org/events"
+	var pathParts [3]string
+	pathParts[0] = "/org/organizers/"
+	{
+		// Encode "organizerId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "organizerId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.OrganizerId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/events"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -1969,7 +2182,7 @@ func (c *Client) sendDeactivateAdminCategory(ctx context.Context, params Deactiv
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.CategoryId))
+			return e.EncodeValue(conv.Int64ToString(params.CategoryId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -1992,13 +2205,13 @@ func (c *Client) sendDeactivateAdminCategory(ctx context.Context, params Deactiv
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, DeactivateAdminCategoryOperation, r); {
+			switch err := c.securityAdminAuth(ctx, DeactivateAdminCategoryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -2090,13 +2303,13 @@ func (c *Client) sendDeactivateAdminCity(ctx context.Context, params DeactivateA
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, DeactivateAdminCityOperation, r); {
+			switch err := c.securityAdminAuth(ctx, DeactivateAdminCityOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -2143,7 +2356,7 @@ func (c *Client) sendDeactivateAdminCity(ctx context.Context, params DeactivateA
 //
 // End a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end
+// POST /org/sale-phases/{salePhaseId}/end
 func (c *Client) EndOrgSalePhase(ctx context.Context, params EndOrgSalePhaseParams) (EndOrgSalePhaseRes, error) {
 	res, err := c.sendEndOrgSalePhase(ctx, params)
 	return res, err
@@ -2152,30 +2365,8 @@ func (c *Client) EndOrgSalePhase(ctx context.Context, params EndOrgSalePhasePara
 func (c *Client) sendEndOrgSalePhase(ctx context.Context, params EndOrgSalePhaseParams) (res EndOrgSalePhaseRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/sale-phases/"
+	var pathParts [3]string
+	pathParts[0] = "/org/sale-phases/"
 	{
 		// Encode "salePhaseId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -2195,9 +2386,9 @@ func (c *Client) sendEndOrgSalePhase(ctx context.Context, params EndOrgSalePhase
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/end"
+	pathParts[2] = "/end"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -2282,7 +2473,7 @@ func (c *Client) sendGetAdminCategory(ctx context.Context, params GetAdminCatego
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.CategoryId))
+			return e.EncodeValue(conv.Int64ToString(params.CategoryId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -2304,13 +2495,13 @@ func (c *Client) sendGetAdminCategory(ctx context.Context, params GetAdminCatego
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, GetAdminCategoryOperation, r); {
+			switch err := c.securityAdminAuth(ctx, GetAdminCategoryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -2401,13 +2592,13 @@ func (c *Client) sendGetAdminCity(ctx context.Context, params GetAdminCityParams
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, GetAdminCityOperation, r); {
+			switch err := c.securityAdminAuth(ctx, GetAdminCityOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -2918,7 +3109,7 @@ func (c *Client) sendGetOrgEvent(ctx context.Context, params GetOrgEventParams) 
 //
 // Get an occurrence.
 //
-// GET /org/events/{eventId}/occurrences/{occurrenceId}
+// GET /org/occurrences/{occurrenceId}
 func (c *Client) GetOrgOccurrence(ctx context.Context, params GetOrgOccurrenceParams) (GetOrgOccurrenceRes, error) {
 	res, err := c.sendGetOrgOccurrence(ctx, params)
 	return res, err
@@ -2927,30 +3118,8 @@ func (c *Client) GetOrgOccurrence(ctx context.Context, params GetOrgOccurrencePa
 func (c *Client) sendGetOrgOccurrence(ctx context.Context, params GetOrgOccurrenceParams) (res GetOrgOccurrenceRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/org/events/"
-	{
-		// Encode "eventId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "eventId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.EventId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/occurrences/"
+	var pathParts [2]string
+	pathParts[0] = "/org/occurrences/"
 	{
 		// Encode "occurrenceId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -2970,7 +3139,7 @@ func (c *Client) sendGetOrgOccurrence(ctx context.Context, params GetOrgOccurren
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -3037,7 +3206,7 @@ func (c *Client) sendGetOrgOccurrence(ctx context.Context, params GetOrgOccurren
 //
 // Get a sale phase.
 //
-// GET /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+// GET /org/sale-phases/{salePhaseId}
 func (c *Client) GetOrgSalePhase(ctx context.Context, params GetOrgSalePhaseParams) (GetOrgSalePhaseRes, error) {
 	res, err := c.sendGetOrgSalePhase(ctx, params)
 	return res, err
@@ -3046,30 +3215,8 @@ func (c *Client) GetOrgSalePhase(ctx context.Context, params GetOrgSalePhasePara
 func (c *Client) sendGetOrgSalePhase(ctx context.Context, params GetOrgSalePhaseParams) (res GetOrgSalePhaseRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/sale-phases/"
+	var pathParts [2]string
+	pathParts[0] = "/org/sale-phases/"
 	{
 		// Encode "salePhaseId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -3089,7 +3236,7 @@ func (c *Client) sendGetOrgSalePhase(ctx context.Context, params GetOrgSalePhase
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -3156,7 +3303,7 @@ func (c *Client) sendGetOrgSalePhase(ctx context.Context, params GetOrgSalePhase
 //
 // Get a ticket category.
 //
-// GET /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+// GET /org/ticket-categories/{ticketCategoryId}
 func (c *Client) GetOrgTicketCategory(ctx context.Context, params GetOrgTicketCategoryParams) (GetOrgTicketCategoryRes, error) {
 	res, err := c.sendGetOrgTicketCategory(ctx, params)
 	return res, err
@@ -3165,30 +3312,8 @@ func (c *Client) GetOrgTicketCategory(ctx context.Context, params GetOrgTicketCa
 func (c *Client) sendGetOrgTicketCategory(ctx context.Context, params GetOrgTicketCategoryParams) (res GetOrgTicketCategoryRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/ticket-categories/"
+	var pathParts [2]string
+	pathParts[0] = "/org/ticket-categories/"
 	{
 		// Encode "ticketCategoryId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -3208,7 +3333,7 @@ func (c *Client) sendGetOrgTicketCategory(ctx context.Context, params GetOrgTick
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -3426,13 +3551,13 @@ func (c *Client) sendListAdminCategories(ctx context.Context) (res ListAdminCate
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ListAdminCategoriesOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ListAdminCategoriesOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -3502,13 +3627,13 @@ func (c *Client) sendListAdminCities(ctx context.Context) (res ListAdminCitiesRe
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ListAdminCitiesOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ListAdminCitiesOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -3615,13 +3740,13 @@ func (c *Client) sendListAdminOrganizerApplications(ctx context.Context, params 
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ListAdminOrganizerApplicationsOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ListAdminOrganizerApplicationsOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -3728,13 +3853,13 @@ func (c *Client) sendListAdminOrganizers(ctx context.Context, params ListAdminOr
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, ListAdminOrganizersOperation, r); {
+			switch err := c.securityAdminAuth(ctx, ListAdminOrganizersOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -3770,6 +3895,82 @@ func (c *Client) sendListAdminOrganizers(ctx context.Context, params ListAdminOr
 	}()
 
 	result, err := decodeListAdminOrganizersResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListAdminStaff invokes listAdminStaff operation.
+//
+// List platform staff.
+//
+// GET /admin/staff
+func (c *Client) ListAdminStaff(ctx context.Context) (ListAdminStaffRes, error) {
+	res, err := c.sendListAdminStaff(ctx)
+	return res, err
+}
+
+func (c *Client) sendListAdminStaff(ctx context.Context) (res ListAdminStaffRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/admin/staff"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityAdminAuth(ctx, ListAdminStaffOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeListAdminStaffResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -4120,7 +4321,7 @@ func (c *Client) sendListMyTickets(ctx context.Context, params ListMyTicketsPara
 //
 // List events.
 //
-// GET /org/events
+// GET /org/organizers/{organizerId}/events
 func (c *Client) ListOrgEvents(ctx context.Context, params ListOrgEventsParams) (ListOrgEventsRes, error) {
 	res, err := c.sendListOrgEvents(ctx, params)
 	return res, err
@@ -4129,8 +4330,30 @@ func (c *Client) ListOrgEvents(ctx context.Context, params ListOrgEventsParams) 
 func (c *Client) sendListOrgEvents(ctx context.Context, params ListOrgEventsParams) (res ListOrgEventsRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/org/events"
+	var pathParts [3]string
+	pathParts[0] = "/org/organizers/"
+	{
+		// Encode "organizerId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "organizerId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.OrganizerId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/events"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	q := uri.NewQueryEncoder()
@@ -4222,6 +4445,104 @@ func (c *Client) sendListOrgEvents(ctx context.Context, params ListOrgEventsPara
 	}()
 
 	result, err := decodeListOrgEventsResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// ListOrgMembers invokes listOrgMembers operation.
+//
+// List members.
+//
+// GET /org/organizers/{organizerId}/members
+func (c *Client) ListOrgMembers(ctx context.Context, params ListOrgMembersParams) (ListOrgMembersRes, error) {
+	res, err := c.sendListOrgMembers(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendListOrgMembers(ctx context.Context, params ListOrgMembersParams) (res ListOrgMembersRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [3]string
+	pathParts[0] = "/org/organizers/"
+	{
+		// Encode "organizerId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "organizerId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.OrganizerId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAuth(ctx, ListOrgMembersOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeListOrgMembersResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5520,7 +5841,7 @@ func (c *Client) sendListPublicUpcomingEvents(ctx context.Context, params ListPu
 //
 // Postpone an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/postpone
+// POST /org/occurrences/{occurrenceId}/postpone
 func (c *Client) PostponeOrgOccurrence(ctx context.Context, params PostponeOrgOccurrenceParams) (PostponeOrgOccurrenceRes, error) {
 	res, err := c.sendPostponeOrgOccurrence(ctx, params)
 	return res, err
@@ -5529,30 +5850,8 @@ func (c *Client) PostponeOrgOccurrence(ctx context.Context, params PostponeOrgOc
 func (c *Client) sendPostponeOrgOccurrence(ctx context.Context, params PostponeOrgOccurrenceParams) (res PostponeOrgOccurrenceRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/events/"
-	{
-		// Encode "eventId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "eventId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.EventId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/occurrences/"
+	var pathParts [3]string
+	pathParts[0] = "/org/occurrences/"
 	{
 		// Encode "occurrenceId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -5572,9 +5871,9 @@ func (c *Client) sendPostponeOrgOccurrence(ctx context.Context, params PostponeO
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/postpone"
+	pathParts[2] = "/postpone"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -5783,7 +6082,126 @@ func (c *Client) sendRejectAdminOrganizerApplication(ctx context.Context, params
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, RejectAdminOrganizerApplicationOperation, r); {
+			switch err := c.securityAdminAuth(ctx, RejectAdminOrganizerApplicationOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeRejectAdminOrganizerApplicationResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// RemoveOrgMember invokes removeOrgMember operation.
+//
+// Removing the last owner is refused: an organizer without an owner has nobody who can manage it.
+//
+// DELETE /org/organizers/{organizerId}/members/{accountId}
+func (c *Client) RemoveOrgMember(ctx context.Context, params RemoveOrgMemberParams) (RemoveOrgMemberRes, error) {
+	res, err := c.sendRemoveOrgMember(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendRemoveOrgMember(ctx context.Context, params RemoveOrgMemberParams) (res RemoveOrgMemberRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [4]string
+	pathParts[0] = "/org/organizers/"
+	{
+		// Encode "organizerId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "organizerId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.OrganizerId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	pathParts[2] = "/members/"
+	{
+		// Encode "accountId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "accountId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.AccountId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "DELETE", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAuth(ctx, RemoveOrgMemberOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
@@ -5824,7 +6242,7 @@ func (c *Client) sendRejectAdminOrganizerApplication(ctx context.Context, params
 		_ = body.Close()
 	}()
 
-	result, err := decodeRejectAdminOrganizerApplicationResponse(resp)
+	result, err := decodeRemoveOrgMemberResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -5881,13 +6299,13 @@ func (c *Client) sendRequestChangesAdminOrganizerApplication(ctx context.Context
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, RequestChangesAdminOrganizerApplicationOperation, r); {
+			switch err := c.securityAdminAuth(ctx, RequestChangesAdminOrganizerApplicationOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -5934,7 +6352,7 @@ func (c *Client) sendRequestChangesAdminOrganizerApplication(ctx context.Context
 //
 // Reschedule an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/reschedule
+// POST /org/occurrences/{occurrenceId}/reschedule
 func (c *Client) RescheduleOrgOccurrence(ctx context.Context, params RescheduleOrgOccurrenceParams) (RescheduleOrgOccurrenceRes, error) {
 	res, err := c.sendRescheduleOrgOccurrence(ctx, params)
 	return res, err
@@ -5943,30 +6361,8 @@ func (c *Client) RescheduleOrgOccurrence(ctx context.Context, params RescheduleO
 func (c *Client) sendRescheduleOrgOccurrence(ctx context.Context, params RescheduleOrgOccurrenceParams) (res RescheduleOrgOccurrenceRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/events/"
-	{
-		// Encode "eventId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "eventId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.EventId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/occurrences/"
+	var pathParts [3]string
+	pathParts[0] = "/org/occurrences/"
 	{
 		// Encode "occurrenceId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -5986,9 +6382,9 @@ func (c *Client) sendRescheduleOrgOccurrence(ctx context.Context, params Resched
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/reschedule"
+	pathParts[2] = "/reschedule"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -6152,7 +6548,7 @@ func (c *Client) sendResubmitMyOrganizerApplication(ctx context.Context, params 
 //
 // Start a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start
+// POST /org/sale-phases/{salePhaseId}/start
 func (c *Client) StartOrgSalePhase(ctx context.Context, params StartOrgSalePhaseParams) (StartOrgSalePhaseRes, error) {
 	res, err := c.sendStartOrgSalePhase(ctx, params)
 	return res, err
@@ -6161,30 +6557,8 @@ func (c *Client) StartOrgSalePhase(ctx context.Context, params StartOrgSalePhase
 func (c *Client) sendStartOrgSalePhase(ctx context.Context, params StartOrgSalePhaseParams) (res StartOrgSalePhaseRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/sale-phases/"
+	var pathParts [3]string
+	pathParts[0] = "/org/sale-phases/"
 	{
 		// Encode "salePhaseId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -6204,9 +6578,9 @@ func (c *Client) sendStartOrgSalePhase(ctx context.Context, params StartOrgSaleP
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/start"
+	pathParts[2] = "/start"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -6317,13 +6691,13 @@ func (c *Client) sendSuspendAdminOrganizer(ctx context.Context, params SuspendAd
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, SuspendAdminOrganizerOperation, r); {
+			switch err := c.securityAdminAuth(ctx, SuspendAdminOrganizerOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -6370,7 +6744,7 @@ func (c *Client) sendSuspendAdminOrganizer(ctx context.Context, params SuspendAd
 //
 // Suspend a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend
+// POST /org/sale-phases/{salePhaseId}/suspend
 func (c *Client) SuspendOrgSalePhase(ctx context.Context, params SuspendOrgSalePhaseParams) (SuspendOrgSalePhaseRes, error) {
 	res, err := c.sendSuspendOrgSalePhase(ctx, params)
 	return res, err
@@ -6379,30 +6753,8 @@ func (c *Client) SuspendOrgSalePhase(ctx context.Context, params SuspendOrgSaleP
 func (c *Client) sendSuspendOrgSalePhase(ctx context.Context, params SuspendOrgSalePhaseParams) (res SuspendOrgSalePhaseRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [5]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/sale-phases/"
+	var pathParts [3]string
+	pathParts[0] = "/org/sale-phases/"
 	{
 		// Encode "salePhaseId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -6422,9 +6774,9 @@ func (c *Client) sendSuspendOrgSalePhase(ctx context.Context, params SuspendOrgS
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
-	pathParts[4] = "/suspend"
+	pathParts[2] = "/suspend"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	r, err := ht.NewRequest(ctx, "POST", u)
@@ -6488,15 +6840,15 @@ func (c *Client) sendSuspendOrgSalePhase(ctx context.Context, params SuspendOrgS
 
 // UpdateAdminCategory invokes updateAdminCategory operation.
 //
-// Update a category.
+// Replace a category.
 //
-// PATCH /admin/categories/{categoryId}
-func (c *Client) UpdateAdminCategory(ctx context.Context, params UpdateAdminCategoryParams) (UpdateAdminCategoryRes, error) {
-	res, err := c.sendUpdateAdminCategory(ctx, params)
+// PUT /admin/categories/{categoryId}
+func (c *Client) UpdateAdminCategory(ctx context.Context, request *UpdateCategoryRequest, params UpdateAdminCategoryParams) (UpdateAdminCategoryRes, error) {
+	res, err := c.sendUpdateAdminCategory(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateAdminCategory(ctx context.Context, params UpdateAdminCategoryParams) (res UpdateAdminCategoryRes, err error) {
+func (c *Client) sendUpdateAdminCategory(ctx context.Context, request *UpdateCategoryRequest, params UpdateAdminCategoryParams) (res UpdateAdminCategoryRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [2]string
@@ -6509,7 +6861,7 @@ func (c *Client) sendUpdateAdminCategory(ctx context.Context, params UpdateAdmin
 			Explode: false,
 		})
 		if err := func() error {
-			return e.EncodeValue(conv.IntToString(params.CategoryId))
+			return e.EncodeValue(conv.Int64ToString(params.CategoryId))
 		}(); err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
@@ -6521,9 +6873,12 @@ func (c *Client) sendUpdateAdminCategory(ctx context.Context, params UpdateAdmin
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
-	r, err := ht.NewRequest(ctx, "PATCH", u)
+	r, err := ht.NewRequest(ctx, "PUT", u)
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateAdminCategoryRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
 	}
 
 	{
@@ -6531,13 +6886,13 @@ func (c *Client) sendUpdateAdminCategory(ctx context.Context, params UpdateAdmin
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, UpdateAdminCategoryOperation, r); {
+			switch err := c.securityAdminAuth(ctx, UpdateAdminCategoryOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -6628,13 +6983,13 @@ func (c *Client) sendUpdateAdminCity(ctx context.Context, params UpdateAdminCity
 		var satisfied bitset
 		{
 
-			switch err := c.securityBearerAuth(ctx, UpdateAdminCityOperation, r); {
+			switch err := c.securityAdminAuth(ctx, UpdateAdminCityOperation, r); {
 			case err == nil: // if NO error
 				satisfied[0] |= 1 << 0
 			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
 				// Skip this security.
 			default:
-				return res, errors.Wrap(err, "security \"BearerAuth\"")
+				return res, errors.Wrap(err, "security \"AdminAuth\"")
 			}
 		}
 
@@ -6871,30 +7226,30 @@ func (c *Client) sendUpdateOrgEvent(ctx context.Context, params UpdateOrgEventPa
 	return result, nil
 }
 
-// UpdateOrgOccurrence invokes updateOrgOccurrence operation.
+// UpdateOrgMember invokes updateOrgMember operation.
 //
-// Update an occurrence.
+// Change a member's role.
 //
-// PATCH /org/events/{eventId}/occurrences/{occurrenceId}
-func (c *Client) UpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (UpdateOrgOccurrenceRes, error) {
-	res, err := c.sendUpdateOrgOccurrence(ctx, params)
+// PATCH /org/organizers/{organizerId}/members/{accountId}
+func (c *Client) UpdateOrgMember(ctx context.Context, request *UpdateOrganizerMemberRequest, params UpdateOrgMemberParams) (UpdateOrgMemberRes, error) {
+	res, err := c.sendUpdateOrgMember(ctx, request, params)
 	return res, err
 }
 
-func (c *Client) sendUpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (res UpdateOrgOccurrenceRes, err error) {
+func (c *Client) sendUpdateOrgMember(ctx context.Context, request *UpdateOrganizerMemberRequest, params UpdateOrgMemberParams) (res UpdateOrgMemberRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
 	var pathParts [4]string
-	pathParts[0] = "/org/events/"
+	pathParts[0] = "/org/organizers/"
 	{
-		// Encode "eventId" parameter.
+		// Encode "organizerId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "eventId",
+			Param:   "organizerId",
 			Style:   uri.PathStyleSimple,
 			Explode: false,
 		})
 		if err := func() error {
-			if unwrapped := uuid.UUID(params.EventId); true {
+			if unwrapped := uuid.UUID(params.OrganizerId); true {
 				return e.EncodeValue(conv.UUIDToString(unwrapped))
 			}
 			return nil
@@ -6907,7 +7262,107 @@ func (c *Client) sendUpdateOrgOccurrence(ctx context.Context, params UpdateOrgOc
 		}
 		pathParts[1] = encoded
 	}
-	pathParts[2] = "/occurrences/"
+	pathParts[2] = "/members/"
+	{
+		// Encode "accountId" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "accountId",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			if unwrapped := uuid.UUID(params.AccountId); true {
+				return e.EncodeValue(conv.UUIDToString(unwrapped))
+			}
+			return nil
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[3] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	r, err := ht.NewRequest(ctx, "PATCH", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeUpdateOrgMemberRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+
+			switch err := c.securityBearerAuth(ctx, UpdateOrgMemberOperation, r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	body := resp.Body
+	defer func() {
+		// Drain the body to EOF before closing, so the underlying
+		// connection can be reused by the Transport regardless of the
+		// response status code. See https://github.com/ogen-go/ogen/issues/1670.
+		_, _ = io.Copy(io.Discard, body)
+		_ = body.Close()
+	}()
+
+	result, err := decodeUpdateOrgMemberResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// UpdateOrgOccurrence invokes updateOrgOccurrence operation.
+//
+// Update an occurrence.
+//
+// PATCH /org/occurrences/{occurrenceId}
+func (c *Client) UpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (UpdateOrgOccurrenceRes, error) {
+	res, err := c.sendUpdateOrgOccurrence(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendUpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (res UpdateOrgOccurrenceRes, err error) {
+
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/org/occurrences/"
 	{
 		// Encode "occurrenceId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -6927,7 +7382,7 @@ func (c *Client) sendUpdateOrgOccurrence(ctx context.Context, params UpdateOrgOc
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -6994,7 +7449,7 @@ func (c *Client) sendUpdateOrgOccurrence(ctx context.Context, params UpdateOrgOc
 //
 // Update a sale phase.
 //
-// PATCH /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+// PATCH /org/sale-phases/{salePhaseId}
 func (c *Client) UpdateOrgSalePhase(ctx context.Context, params UpdateOrgSalePhaseParams) (UpdateOrgSalePhaseRes, error) {
 	res, err := c.sendUpdateOrgSalePhase(ctx, params)
 	return res, err
@@ -7003,30 +7458,8 @@ func (c *Client) UpdateOrgSalePhase(ctx context.Context, params UpdateOrgSalePha
 func (c *Client) sendUpdateOrgSalePhase(ctx context.Context, params UpdateOrgSalePhaseParams) (res UpdateOrgSalePhaseRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/sale-phases/"
+	var pathParts [2]string
+	pathParts[0] = "/org/sale-phases/"
 	{
 		// Encode "salePhaseId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -7046,7 +7479,7 @@ func (c *Client) sendUpdateOrgSalePhase(ctx context.Context, params UpdateOrgSal
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 
@@ -7113,7 +7546,7 @@ func (c *Client) sendUpdateOrgSalePhase(ctx context.Context, params UpdateOrgSal
 //
 // Update a ticket category.
 //
-// PATCH /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+// PATCH /org/ticket-categories/{ticketCategoryId}
 func (c *Client) UpdateOrgTicketCategory(ctx context.Context, params UpdateOrgTicketCategoryParams) (UpdateOrgTicketCategoryRes, error) {
 	res, err := c.sendUpdateOrgTicketCategory(ctx, params)
 	return res, err
@@ -7122,30 +7555,8 @@ func (c *Client) UpdateOrgTicketCategory(ctx context.Context, params UpdateOrgTi
 func (c *Client) sendUpdateOrgTicketCategory(ctx context.Context, params UpdateOrgTicketCategoryParams) (res UpdateOrgTicketCategoryRes, err error) {
 
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [4]string
-	pathParts[0] = "/org/occurrences/"
-	{
-		// Encode "occurrenceId" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "occurrenceId",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			if unwrapped := uuid.UUID(params.OccurrenceId); true {
-				return e.EncodeValue(conv.UUIDToString(unwrapped))
-			}
-			return nil
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/ticket-categories/"
+	var pathParts [2]string
+	pathParts[0] = "/org/ticket-categories/"
 	{
 		// Encode "ticketCategoryId" parameter.
 		e := uri.NewPathEncoder(uri.PathEncoderConfig{
@@ -7165,7 +7576,7 @@ func (c *Client) sendUpdateOrgTicketCategory(ctx context.Context, params UpdateO
 		if err != nil {
 			return res, errors.Wrap(err, "encode path")
 		}
-		pathParts[3] = encoded
+		pathParts[1] = encoded
 	}
 	uri.AddPathParts(u, pathParts[:]...)
 

@@ -1,5 +1,22 @@
 {
   "yaml.schemas": {
     "https://json-schema.org/draft/2020-12/schema": "*/components/schemas/**/*.yaml",
-  }
+  },
+  "go.lintTool": "golangci-lint",
+  "go.lintFlags": [
+    "--path-mode=abs",
+    "--fast-only"
+  ],
+  "go.formatTool": "custom",
+  "go.alternateTools": {
+    "customFormatter": "golangci-lint"
+  },
+  "go.formatFlags": [
+    "fmt",
+    "--stdin"
+  ],
+  "sqlfluff.linter.run": "onSave",
+  "[sql][postgres]": {
+    "editor.defaultFormatter": "sqlfluff.vscode-sqlfluff",
+  },
 }

@@ -11,12 +11,14 @@ type Handler interface {
 	CategoriesHandler
 	CitiesHandler
 	EventsHandler
+	MembersHandler
 	OccurrencesHandler
 	OrdersHandler
 	OrganizerApplicationsHandler
 	OrganizersHandler
 	ProfileHandler
 	SalePhasesHandler
+	StaffHandler
 	TicketCategoriesHandler
 	TicketsHandler
 	// NewError creates *DefaultStatusCode from error returned by handler.
@@ -40,7 +42,7 @@ type CategoriesHandler interface {
 	// Create a category.
 	//
 	// POST /admin/categories
-	CreateAdminCategory(ctx context.Context) (CreateAdminCategoryRes, error)
+	CreateAdminCategory(ctx context.Context, req *CreateCategoryRequest) (CreateAdminCategoryRes, error)
 	// DeactivateAdminCategory implements deactivateAdminCategory operation.
 	//
 	// Deactivate a category.
@@ -67,10 +69,10 @@ type CategoriesHandler interface {
 	ListPublicCategories(ctx context.Context) (ListPublicCategoriesRes, error)
 	// UpdateAdminCategory implements updateAdminCategory operation.
 	//
-	// Update a category.
+	// Replace a category.
 	//
-	// PATCH /admin/categories/{categoryId}
-	UpdateAdminCategory(ctx context.Context, params UpdateAdminCategoryParams) (UpdateAdminCategoryRes, error)
+	// PUT /admin/categories/{categoryId}
+	UpdateAdminCategory(ctx context.Context, req *UpdateCategoryRequest, params UpdateAdminCategoryParams) (UpdateAdminCategoryRes, error)
 }
 
 // CitiesHandler handles operations described by OpenAPI v3 specification.
@@ -135,8 +137,8 @@ type EventsHandler interface {
 	//
 	// Create an event.
 	//
-	// POST /org/events
-	CreateOrgEvent(ctx context.Context) (CreateOrgEventRes, error)
+	// POST /org/organizers/{organizerId}/events
+	CreateOrgEvent(ctx context.Context, params CreateOrgEventParams) (CreateOrgEventRes, error)
 	// GetOrgEvent implements getOrgEvent operation.
 	//
 	// Get an event.
@@ -153,7 +155,7 @@ type EventsHandler interface {
 	//
 	// List events.
 	//
-	// GET /org/events
+	// GET /org/organizers/{organizerId}/events
 	ListOrgEvents(ctx context.Context, params ListOrgEventsParams) (ListOrgEventsRes, error)
 	// ListPublicEvents implements listPublicEvents operation.
 	//
@@ -193,6 +195,37 @@ type EventsHandler interface {
 	UpdateOrgEvent(ctx context.Context, params UpdateOrgEventParams) (UpdateOrgEventRes, error)
 }
 
+// MembersHandler handles operations described by OpenAPI v3 specification.
+//
+// x-ogen-operation-group: Members
+type MembersHandler interface {
+	// AddOrgMember implements addOrgMember operation.
+	//
+	// Adds an existing gotick account to the organizer, found by the email it registered with. Only owners
+	// may change the member list.
+	//
+	// POST /org/organizers/{organizerId}/members
+	AddOrgMember(ctx context.Context, req *AddOrganizerMemberRequest, params AddOrgMemberParams) (AddOrgMemberRes, error)
+	// ListOrgMembers implements listOrgMembers operation.
+	//
+	// List members.
+	//
+	// GET /org/organizers/{organizerId}/members
+	ListOrgMembers(ctx context.Context, params ListOrgMembersParams) (ListOrgMembersRes, error)
+	// RemoveOrgMember implements removeOrgMember operation.
+	//
+	// Removing the last owner is refused: an organizer without an owner has nobody who can manage it.
+	//
+	// DELETE /org/organizers/{organizerId}/members/{accountId}
+	RemoveOrgMember(ctx context.Context, params RemoveOrgMemberParams) (RemoveOrgMemberRes, error)
+	// UpdateOrgMember implements updateOrgMember operation.
+	//
+	// Change a member's role.
+	//
+	// PATCH /org/organizers/{organizerId}/members/{accountId}
+	UpdateOrgMember(ctx context.Context, req *UpdateOrganizerMemberRequest, params UpdateOrgMemberParams) (UpdateOrgMemberRes, error)
+}
+
 // OccurrencesHandler handles operations described by OpenAPI v3 specification.
 //
 // x-ogen-operation-group: Occurrences
@@ -201,7 +234,7 @@ type OccurrencesHandler interface {
 	//
 	// Cancel an occurrence.
 	//
-	// POST /org/events/{eventId}/occurrences/{occurrenceId}/cancel
+	// POST /org/occurrences/{occurrenceId}/cancel
 	CancelOrgOccurrence(ctx context.Context, params CancelOrgOccurrenceParams) (CancelOrgOccurrenceRes, error)
 	// CreateOrgOccurrence implements createOrgOccurrence operation.
 	//
@@ -213,7 +246,7 @@ type OccurrencesHandler interface {
 	//
 	// Get an occurrence.
 	//
-	// GET /org/events/{eventId}/occurrences/{occurrenceId}
+	// GET /org/occurrences/{occurrenceId}
 	GetOrgOccurrence(ctx context.Context, params GetOrgOccurrenceParams) (GetOrgOccurrenceRes, error)
 	// ListOrgOccurrences implements listOrgOccurrences operation.
 	//
@@ -231,19 +264,19 @@ type OccurrencesHandler interface {
 	//
 	// Postpone an occurrence.
 	//
-	// POST /org/events/{eventId}/occurrences/{occurrenceId}/postpone
+	// POST /org/occurrences/{occurrenceId}/postpone
 	PostponeOrgOccurrence(ctx context.Context, params PostponeOrgOccurrenceParams) (PostponeOrgOccurrenceRes, error)
 	// RescheduleOrgOccurrence implements rescheduleOrgOccurrence operation.
 	//
 	// Reschedule an occurrence.
 	//
-	// POST /org/events/{eventId}/occurrences/{occurrenceId}/reschedule
+	// POST /org/occurrences/{occurrenceId}/reschedule
 	RescheduleOrgOccurrence(ctx context.Context, params RescheduleOrgOccurrenceParams) (RescheduleOrgOccurrenceRes, error)
 	// UpdateOrgOccurrence implements updateOrgOccurrence operation.
 	//
 	// Update an occurrence.
 	//
-	// PATCH /org/events/{eventId}/occurrences/{occurrenceId}
+	// PATCH /org/occurrences/{occurrenceId}
 	UpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (UpdateOrgOccurrenceRes, error)
 }
 
@@ -371,6 +404,12 @@ type OrganizersHandler interface {
 //
 // x-ogen-operation-group: Profile
 type ProfileHandler interface {
+	// CreateMyProfile implements createMyProfile operation.
+	//
+	// Create my profile.
+	//
+	// POST /me/profile
+	CreateMyProfile(ctx context.Context, req *CreateMyProfileRequest) (CreateMyProfileRes, error)
 	// GetMyProfile implements getMyProfile operation.
 	//
 	// Get my profile.
@@ -387,7 +426,7 @@ type SalePhasesHandler interface {
 	//
 	// Cancel a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel
+	// POST /org/sale-phases/{salePhaseId}/cancel
 	CancelOrgSalePhase(ctx context.Context, params CancelOrgSalePhaseParams) (CancelOrgSalePhaseRes, error)
 	// CreateOrgSalePhase implements createOrgSalePhase operation.
 	//
@@ -399,13 +438,13 @@ type SalePhasesHandler interface {
 	//
 	// End a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end
+	// POST /org/sale-phases/{salePhaseId}/end
 	EndOrgSalePhase(ctx context.Context, params EndOrgSalePhaseParams) (EndOrgSalePhaseRes, error)
 	// GetOrgSalePhase implements getOrgSalePhase operation.
 	//
 	// Get a sale phase.
 	//
-	// GET /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+	// GET /org/sale-phases/{salePhaseId}
 	GetOrgSalePhase(ctx context.Context, params GetOrgSalePhaseParams) (GetOrgSalePhaseRes, error)
 	// ListOrgSalePhases implements listOrgSalePhases operation.
 	//
@@ -423,20 +462,32 @@ type SalePhasesHandler interface {
 	//
 	// Start a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start
+	// POST /org/sale-phases/{salePhaseId}/start
 	StartOrgSalePhase(ctx context.Context, params StartOrgSalePhaseParams) (StartOrgSalePhaseRes, error)
 	// SuspendOrgSalePhase implements suspendOrgSalePhase operation.
 	//
 	// Suspend a sale phase.
 	//
-	// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend
+	// POST /org/sale-phases/{salePhaseId}/suspend
 	SuspendOrgSalePhase(ctx context.Context, params SuspendOrgSalePhaseParams) (SuspendOrgSalePhaseRes, error)
 	// UpdateOrgSalePhase implements updateOrgSalePhase operation.
 	//
 	// Update a sale phase.
 	//
-	// PATCH /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+	// PATCH /org/sale-phases/{salePhaseId}
 	UpdateOrgSalePhase(ctx context.Context, params UpdateOrgSalePhaseParams) (UpdateOrgSalePhaseRes, error)
+}
+
+// StaffHandler handles operations described by OpenAPI v3 specification.
+//
+// x-ogen-operation-group: Staff
+type StaffHandler interface {
+	// ListAdminStaff implements listAdminStaff operation.
+	//
+	// List platform staff.
+	//
+	// GET /admin/staff
+	ListAdminStaff(ctx context.Context) (ListAdminStaffRes, error)
 }
 
 // TicketCategoriesHandler handles operations described by OpenAPI v3 specification.
@@ -453,7 +504,7 @@ type TicketCategoriesHandler interface {
 	//
 	// Get a ticket category.
 	//
-	// GET /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+	// GET /org/ticket-categories/{ticketCategoryId}
 	GetOrgTicketCategory(ctx context.Context, params GetOrgTicketCategoryParams) (GetOrgTicketCategoryRes, error)
 	// ListOrgTicketCategories implements listOrgTicketCategories operation.
 	//
@@ -471,7 +522,7 @@ type TicketCategoriesHandler interface {
 	//
 	// Update a ticket category.
 	//
-	// PATCH /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+	// PATCH /org/ticket-categories/{ticketCategoryId}
 	UpdateOrgTicketCategory(ctx context.Context, params UpdateOrgTicketCategoryParams) (UpdateOrgTicketCategoryRes, error)
 }
 

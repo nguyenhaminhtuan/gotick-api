@@ -5,7 +5,7 @@ get:
   x-ogen-operation-group: Organizers
   summary: List organizers
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - $ref: ../components/parameters/Page.yaml
     - $ref: ../components/parameters/PageSize.yaml

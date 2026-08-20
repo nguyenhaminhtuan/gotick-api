@@ -1,5 +1,7 @@
 type: object
 properties:
+  account:
+    $ref: ./AccountSummary.yaml
   role:
     $ref: ./OrganizerMemberRole.yaml
   createdAt:
@@ -9,6 +11,7 @@ properties:
     type: string
     format: date-time
 required:
+  - account
   - role
   - createdAt
   - updatedAt

@@ -16,6 +16,7 @@ import (
 	"gotick/internal/database"
 	"gotick/internal/log"
 	"gotick/internal/server"
+	"gotick/internal/service"
 )
 
 func main() {
@@ -56,7 +57,15 @@ func run(ctx context.Context) error {
 		return err
 	}
 
-	srv, err := server.NewServer(config, logger, api.NewHandler(db, logger, verifier))
+	uow := service.NewUnitOfWork(db)
+
+	categories := service.NewCategories(db, uow, logger)
+	accounts := service.NewAccounts(db, verifier, logger)
+	staff := service.NewStaff(db, logger)
+
+	handler := api.NewHandler(categories, accounts, staff, logger, verifier)
+
+	srv, err := server.NewServer(config, logger, handler)
 	if err != nil {
 		return err
 	}

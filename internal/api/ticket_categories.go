@@ -7,7 +7,7 @@ import (
 )
 
 // ticketCategoriesHandler serves the TicketCategories operations, across every audience that exposes them.
-type ticketCategoriesHandler struct{ deps }
+type ticketCategoriesHandler struct{}
 
 // Compile-time check for ticketCategoriesHandler.
 var _ oas.TicketCategoriesHandler = (*ticketCategoriesHandler)(nil)

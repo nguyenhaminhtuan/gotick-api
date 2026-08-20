@@ -7,7 +7,7 @@ import (
 )
 
 // citiesHandler serves the Cities operations, across every audience that exposes them.
-type citiesHandler struct{ deps }
+type citiesHandler struct{}
 
 // Compile-time check for citiesHandler.
 var _ oas.CitiesHandler = (*citiesHandler)(nil)

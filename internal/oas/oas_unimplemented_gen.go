@@ -40,6 +40,16 @@ func (UnimplementedHandler) ActivateAdminOrganizer(ctx context.Context, params A
 	return r, ht.ErrNotImplemented
 }
 
+// AddOrgMember implements addOrgMember operation.
+//
+// Adds an existing gotick account to the organizer, found by the email it registered with. Only owners
+// may change the member list.
+//
+// POST /org/organizers/{organizerId}/members
+func (UnimplementedHandler) AddOrgMember(ctx context.Context, req *AddOrganizerMemberRequest, params AddOrgMemberParams) (r AddOrgMemberRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ApproveAdminOrganizerApplication implements approveAdminOrganizerApplication operation.
 //
 // Approve an organizer application.
@@ -53,7 +63,7 @@ func (UnimplementedHandler) ApproveAdminOrganizerApplication(ctx context.Context
 //
 // Cancel an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/cancel
+// POST /org/occurrences/{occurrenceId}/cancel
 func (UnimplementedHandler) CancelOrgOccurrence(ctx context.Context, params CancelOrgOccurrenceParams) (r CancelOrgOccurrenceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -62,7 +72,7 @@ func (UnimplementedHandler) CancelOrgOccurrence(ctx context.Context, params Canc
 //
 // Cancel a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel
+// POST /org/sale-phases/{salePhaseId}/cancel
 func (UnimplementedHandler) CancelOrgSalePhase(ctx context.Context, params CancelOrgSalePhaseParams) (r CancelOrgSalePhaseRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -81,7 +91,7 @@ func (UnimplementedHandler) CloseOrgEvent(ctx context.Context, params CloseOrgEv
 // Create a category.
 //
 // POST /admin/categories
-func (UnimplementedHandler) CreateAdminCategory(ctx context.Context) (r CreateAdminCategoryRes, _ error) {
+func (UnimplementedHandler) CreateAdminCategory(ctx context.Context, req *CreateCategoryRequest) (r CreateAdminCategoryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -112,12 +122,21 @@ func (UnimplementedHandler) CreateMyOrganizerApplication(ctx context.Context) (r
 	return r, ht.ErrNotImplemented
 }
 
+// CreateMyProfile implements createMyProfile operation.
+//
+// Create my profile.
+//
+// POST /me/profile
+func (UnimplementedHandler) CreateMyProfile(ctx context.Context, req *CreateMyProfileRequest) (r CreateMyProfileRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreateOrgEvent implements createOrgEvent operation.
 //
 // Create an event.
 //
-// POST /org/events
-func (UnimplementedHandler) CreateOrgEvent(ctx context.Context) (r CreateOrgEventRes, _ error) {
+// POST /org/organizers/{organizerId}/events
+func (UnimplementedHandler) CreateOrgEvent(ctx context.Context, params CreateOrgEventParams) (r CreateOrgEventRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -170,7 +189,7 @@ func (UnimplementedHandler) DeactivateAdminCity(ctx context.Context, params Deac
 //
 // End a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end
+// POST /org/sale-phases/{salePhaseId}/end
 func (UnimplementedHandler) EndOrgSalePhase(ctx context.Context, params EndOrgSalePhaseParams) (r EndOrgSalePhaseRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -242,7 +261,7 @@ func (UnimplementedHandler) GetOrgEvent(ctx context.Context, params GetOrgEventP
 //
 // Get an occurrence.
 //
-// GET /org/events/{eventId}/occurrences/{occurrenceId}
+// GET /org/occurrences/{occurrenceId}
 func (UnimplementedHandler) GetOrgOccurrence(ctx context.Context, params GetOrgOccurrenceParams) (r GetOrgOccurrenceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -251,7 +270,7 @@ func (UnimplementedHandler) GetOrgOccurrence(ctx context.Context, params GetOrgO
 //
 // Get a sale phase.
 //
-// GET /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+// GET /org/sale-phases/{salePhaseId}
 func (UnimplementedHandler) GetOrgSalePhase(ctx context.Context, params GetOrgSalePhaseParams) (r GetOrgSalePhaseRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -260,7 +279,7 @@ func (UnimplementedHandler) GetOrgSalePhase(ctx context.Context, params GetOrgSa
 //
 // Get a ticket category.
 //
-// GET /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+// GET /org/ticket-categories/{ticketCategoryId}
 func (UnimplementedHandler) GetOrgTicketCategory(ctx context.Context, params GetOrgTicketCategoryParams) (r GetOrgTicketCategoryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -319,6 +338,15 @@ func (UnimplementedHandler) ListAdminOrganizers(ctx context.Context, params List
 	return r, ht.ErrNotImplemented
 }
 
+// ListAdminStaff implements listAdminStaff operation.
+//
+// List platform staff.
+//
+// GET /admin/staff
+func (UnimplementedHandler) ListAdminStaff(ctx context.Context) (r ListAdminStaffRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListMyOrders implements listMyOrders operation.
 //
 // List my orders.
@@ -350,8 +378,17 @@ func (UnimplementedHandler) ListMyTickets(ctx context.Context, params ListMyTick
 //
 // List events.
 //
-// GET /org/events
+// GET /org/organizers/{organizerId}/events
 func (UnimplementedHandler) ListOrgEvents(ctx context.Context, params ListOrgEventsParams) (r ListOrgEventsRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// ListOrgMembers implements listOrgMembers operation.
+//
+// List members.
+//
+// GET /org/organizers/{organizerId}/members
+func (UnimplementedHandler) ListOrgMembers(ctx context.Context, params ListOrgMembersParams) (r ListOrgMembersRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -476,7 +513,7 @@ func (UnimplementedHandler) ListPublicUpcomingEvents(ctx context.Context, params
 //
 // Postpone an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/postpone
+// POST /org/occurrences/{occurrenceId}/postpone
 func (UnimplementedHandler) PostponeOrgOccurrence(ctx context.Context, params PostponeOrgOccurrenceParams) (r PostponeOrgOccurrenceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -499,6 +536,15 @@ func (UnimplementedHandler) RejectAdminOrganizerApplication(ctx context.Context,
 	return r, ht.ErrNotImplemented
 }
 
+// RemoveOrgMember implements removeOrgMember operation.
+//
+// Removing the last owner is refused: an organizer without an owner has nobody who can manage it.
+//
+// DELETE /org/organizers/{organizerId}/members/{accountId}
+func (UnimplementedHandler) RemoveOrgMember(ctx context.Context, params RemoveOrgMemberParams) (r RemoveOrgMemberRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // RequestChangesAdminOrganizerApplication implements requestChangesAdminOrganizerApplication operation.
 //
 // Request changes on an organizer application.
@@ -512,7 +558,7 @@ func (UnimplementedHandler) RequestChangesAdminOrganizerApplication(ctx context.
 //
 // Reschedule an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/reschedule
+// POST /org/occurrences/{occurrenceId}/reschedule
 func (UnimplementedHandler) RescheduleOrgOccurrence(ctx context.Context, params RescheduleOrgOccurrenceParams) (r RescheduleOrgOccurrenceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -530,7 +576,7 @@ func (UnimplementedHandler) ResubmitMyOrganizerApplication(ctx context.Context, 
 //
 // Start a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start
+// POST /org/sale-phases/{salePhaseId}/start
 func (UnimplementedHandler) StartOrgSalePhase(ctx context.Context, params StartOrgSalePhaseParams) (r StartOrgSalePhaseRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -548,17 +594,17 @@ func (UnimplementedHandler) SuspendAdminOrganizer(ctx context.Context, params Su
 //
 // Suspend a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend
+// POST /org/sale-phases/{salePhaseId}/suspend
 func (UnimplementedHandler) SuspendOrgSalePhase(ctx context.Context, params SuspendOrgSalePhaseParams) (r SuspendOrgSalePhaseRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
 // UpdateAdminCategory implements updateAdminCategory operation.
 //
-// Update a category.
+// Replace a category.
 //
-// PATCH /admin/categories/{categoryId}
-func (UnimplementedHandler) UpdateAdminCategory(ctx context.Context, params UpdateAdminCategoryParams) (r UpdateAdminCategoryRes, _ error) {
+// PUT /admin/categories/{categoryId}
+func (UnimplementedHandler) UpdateAdminCategory(ctx context.Context, req *UpdateCategoryRequest, params UpdateAdminCategoryParams) (r UpdateAdminCategoryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -589,11 +635,20 @@ func (UnimplementedHandler) UpdateOrgEvent(ctx context.Context, params UpdateOrg
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateOrgMember implements updateOrgMember operation.
+//
+// Change a member's role.
+//
+// PATCH /org/organizers/{organizerId}/members/{accountId}
+func (UnimplementedHandler) UpdateOrgMember(ctx context.Context, req *UpdateOrganizerMemberRequest, params UpdateOrgMemberParams) (r UpdateOrgMemberRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateOrgOccurrence implements updateOrgOccurrence operation.
 //
 // Update an occurrence.
 //
-// PATCH /org/events/{eventId}/occurrences/{occurrenceId}
+// PATCH /org/occurrences/{occurrenceId}
 func (UnimplementedHandler) UpdateOrgOccurrence(ctx context.Context, params UpdateOrgOccurrenceParams) (r UpdateOrgOccurrenceRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -602,7 +657,7 @@ func (UnimplementedHandler) UpdateOrgOccurrence(ctx context.Context, params Upda
 //
 // Update a sale phase.
 //
-// PATCH /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
+// PATCH /org/sale-phases/{salePhaseId}
 func (UnimplementedHandler) UpdateOrgSalePhase(ctx context.Context, params UpdateOrgSalePhaseParams) (r UpdateOrgSalePhaseRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
@@ -611,7 +666,7 @@ func (UnimplementedHandler) UpdateOrgSalePhase(ctx context.Context, params Updat
 //
 // Update a ticket category.
 //
-// PATCH /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
+// PATCH /org/ticket-categories/{ticketCategoryId}
 func (UnimplementedHandler) UpdateOrgTicketCategory(ctx context.Context, params UpdateOrgTicketCategoryParams) (r UpdateOrgTicketCategoryRes, _ error) {
 	return r, ht.ErrNotImplemented
 }

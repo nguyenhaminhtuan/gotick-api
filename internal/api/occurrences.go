@@ -7,7 +7,7 @@ import (
 )
 
 // occurrencesHandler serves the Occurrences operations, across every audience that exposes them.
-type occurrencesHandler struct{ deps }
+type occurrencesHandler struct{}
 
 // Compile-time check for occurrencesHandler.
 var _ oas.OccurrencesHandler = (*occurrencesHandler)(nil)

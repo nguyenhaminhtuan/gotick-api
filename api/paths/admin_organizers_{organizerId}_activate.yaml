@@ -5,7 +5,7 @@ post:
   x-ogen-operation-group: Organizers
   summary: Activate an organizer
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - name: organizerId
       in: path

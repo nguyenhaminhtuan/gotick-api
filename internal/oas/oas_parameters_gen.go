@@ -17,7 +17,7 @@ import (
 
 // ActivateAdminCategoryParams is parameters of activateAdminCategory operation.
 type ActivateAdminCategoryParams struct {
-	CategoryId int
+	CategoryId int64
 }
 
 func unpackActivateAdminCategoryParams(packed middleware.Parameters) (params ActivateAdminCategoryParams) {
@@ -26,7 +26,7 @@ func unpackActivateAdminCategoryParams(packed middleware.Parameters) (params Act
 			Name: "categoryId",
 			In:   "path",
 		}
-		params.CategoryId = packed[key].(int)
+		params.CategoryId = packed[key].(int64)
 	}
 	return params
 }
@@ -56,7 +56,7 @@ func decodeActivateAdminCategoryParams(args [1]string, argsEscaped bool, r *http
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -232,6 +232,78 @@ func decodeActivateAdminOrganizerParams(args [1]string, argsEscaped bool, r *htt
 	return params, nil
 }
 
+// AddOrgMemberParams is parameters of addOrgMember operation.
+type AddOrgMemberParams struct {
+	OrganizerId UUID
+}
+
+func unpackAddOrgMemberParams(packed middleware.Parameters) (params AddOrgMemberParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "organizerId",
+			In:   "path",
+		}
+		params.OrganizerId = packed[key].(UUID)
+	}
+	return params
+}
+
+func decodeAddOrgMemberParams(args [1]string, argsEscaped bool, r *http.Request) (params AddOrgMemberParams, _ error) {
+	// Decode path: organizerId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "organizerId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotOrganizerIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrganizerIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OrganizerId = UUID(paramsDotOrganizerIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "organizerId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // ApproveAdminOrganizerApplicationParams is parameters of approveAdminOrganizerApplication operation.
 type ApproveAdminOrganizerApplicationParams struct {
 	OrganizerApplicationId UUID
@@ -306,18 +378,10 @@ func decodeApproveAdminOrganizerApplicationParams(args [1]string, argsEscaped bo
 
 // CancelOrgOccurrenceParams is parameters of cancelOrgOccurrence operation.
 type CancelOrgOccurrenceParams struct {
-	EventId      UUID
 	OccurrenceId UUID
 }
 
 func unpackCancelOrgOccurrenceParams(packed middleware.Parameters) (params CancelOrgOccurrenceParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "eventId",
-			In:   "path",
-		}
-		params.EventId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "occurrenceId",
@@ -328,64 +392,12 @@ func unpackCancelOrgOccurrenceParams(packed middleware.Parameters) (params Cance
 	return params
 }
 
-func decodeCancelOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.Request) (params CancelOrgOccurrenceParams, _ error) {
-	// Decode path: eventId.
+func decodeCancelOrgOccurrenceParams(args [1]string, argsEscaped bool, r *http.Request) (params CancelOrgOccurrenceParams, _ error) {
+	// Decode path: occurrenceId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "eventId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotEventIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEventIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EventId = UUID(paramsDotEventIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "eventId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: occurrenceId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -438,18 +450,10 @@ func decodeCancelOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.R
 
 // CancelOrgSalePhaseParams is parameters of cancelOrgSalePhase operation.
 type CancelOrgSalePhaseParams struct {
-	OccurrenceId UUID
-	SalePhaseId  UUID
+	SalePhaseId UUID
 }
 
 func unpackCancelOrgSalePhaseParams(packed middleware.Parameters) (params CancelOrgSalePhaseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "salePhaseId",
@@ -460,64 +464,12 @@ func unpackCancelOrgSalePhaseParams(packed middleware.Parameters) (params Cancel
 	return params
 }
 
-func decodeCancelOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Request) (params CancelOrgSalePhaseParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeCancelOrgSalePhaseParams(args [1]string, argsEscaped bool, r *http.Request) (params CancelOrgSalePhaseParams, _ error) {
+	// Decode path: salePhaseId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: salePhaseId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -633,6 +585,78 @@ func decodeCloseOrgEventParams(args [1]string, argsEscaped bool, r *http.Request
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
 			Name: "eventId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// CreateOrgEventParams is parameters of createOrgEvent operation.
+type CreateOrgEventParams struct {
+	OrganizerId UUID
+}
+
+func unpackCreateOrgEventParams(packed middleware.Parameters) (params CreateOrgEventParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "organizerId",
+			In:   "path",
+		}
+		params.OrganizerId = packed[key].(UUID)
+	}
+	return params
+}
+
+func decodeCreateOrgEventParams(args [1]string, argsEscaped bool, r *http.Request) (params CreateOrgEventParams, _ error) {
+	// Decode path: organizerId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "organizerId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotOrganizerIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrganizerIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OrganizerId = UUID(paramsDotOrganizerIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "organizerId",
 			In:   "path",
 			Err:  err,
 		}
@@ -858,7 +882,7 @@ func decodeCreateOrgTicketCategoryParams(args [1]string, argsEscaped bool, r *ht
 
 // DeactivateAdminCategoryParams is parameters of deactivateAdminCategory operation.
 type DeactivateAdminCategoryParams struct {
-	CategoryId int
+	CategoryId int64
 }
 
 func unpackDeactivateAdminCategoryParams(packed middleware.Parameters) (params DeactivateAdminCategoryParams) {
@@ -867,7 +891,7 @@ func unpackDeactivateAdminCategoryParams(packed middleware.Parameters) (params D
 			Name: "categoryId",
 			In:   "path",
 		}
-		params.CategoryId = packed[key].(int)
+		params.CategoryId = packed[key].(int64)
 	}
 	return params
 }
@@ -897,7 +921,7 @@ func decodeDeactivateAdminCategoryParams(args [1]string, argsEscaped bool, r *ht
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -1003,18 +1027,10 @@ func decodeDeactivateAdminCityParams(args [1]string, argsEscaped bool, r *http.R
 
 // EndOrgSalePhaseParams is parameters of endOrgSalePhase operation.
 type EndOrgSalePhaseParams struct {
-	OccurrenceId UUID
-	SalePhaseId  UUID
+	SalePhaseId UUID
 }
 
 func unpackEndOrgSalePhaseParams(packed middleware.Parameters) (params EndOrgSalePhaseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "salePhaseId",
@@ -1025,64 +1041,12 @@ func unpackEndOrgSalePhaseParams(packed middleware.Parameters) (params EndOrgSal
 	return params
 }
 
-func decodeEndOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Request) (params EndOrgSalePhaseParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeEndOrgSalePhaseParams(args [1]string, argsEscaped bool, r *http.Request) (params EndOrgSalePhaseParams, _ error) {
+	// Decode path: salePhaseId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: salePhaseId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -1135,7 +1099,7 @@ func decodeEndOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Reque
 
 // GetAdminCategoryParams is parameters of getAdminCategory operation.
 type GetAdminCategoryParams struct {
-	CategoryId int
+	CategoryId int64
 }
 
 func unpackGetAdminCategoryParams(packed middleware.Parameters) (params GetAdminCategoryParams) {
@@ -1144,7 +1108,7 @@ func unpackGetAdminCategoryParams(packed middleware.Parameters) (params GetAdmin
 			Name: "categoryId",
 			In:   "path",
 		}
-		params.CategoryId = packed[key].(int)
+		params.CategoryId = packed[key].(int64)
 	}
 	return params
 }
@@ -1174,7 +1138,7 @@ func decodeGetAdminCategoryParams(args [1]string, argsEscaped bool, r *http.Requ
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -1568,18 +1532,10 @@ func decodeGetOrgEventParams(args [1]string, argsEscaped bool, r *http.Request) 
 
 // GetOrgOccurrenceParams is parameters of getOrgOccurrence operation.
 type GetOrgOccurrenceParams struct {
-	EventId      UUID
 	OccurrenceId UUID
 }
 
 func unpackGetOrgOccurrenceParams(packed middleware.Parameters) (params GetOrgOccurrenceParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "eventId",
-			In:   "path",
-		}
-		params.EventId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "occurrenceId",
@@ -1590,64 +1546,12 @@ func unpackGetOrgOccurrenceParams(packed middleware.Parameters) (params GetOrgOc
 	return params
 }
 
-func decodeGetOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.Request) (params GetOrgOccurrenceParams, _ error) {
-	// Decode path: eventId.
+func decodeGetOrgOccurrenceParams(args [1]string, argsEscaped bool, r *http.Request) (params GetOrgOccurrenceParams, _ error) {
+	// Decode path: occurrenceId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "eventId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotEventIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEventIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EventId = UUID(paramsDotEventIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "eventId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: occurrenceId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -1700,18 +1604,10 @@ func decodeGetOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.Requ
 
 // GetOrgSalePhaseParams is parameters of getOrgSalePhase operation.
 type GetOrgSalePhaseParams struct {
-	OccurrenceId UUID
-	SalePhaseId  UUID
+	SalePhaseId UUID
 }
 
 func unpackGetOrgSalePhaseParams(packed middleware.Parameters) (params GetOrgSalePhaseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "salePhaseId",
@@ -1722,64 +1618,12 @@ func unpackGetOrgSalePhaseParams(packed middleware.Parameters) (params GetOrgSal
 	return params
 }
 
-func decodeGetOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Request) (params GetOrgSalePhaseParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeGetOrgSalePhaseParams(args [1]string, argsEscaped bool, r *http.Request) (params GetOrgSalePhaseParams, _ error) {
+	// Decode path: salePhaseId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: salePhaseId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -1832,18 +1676,10 @@ func decodeGetOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Reque
 
 // GetOrgTicketCategoryParams is parameters of getOrgTicketCategory operation.
 type GetOrgTicketCategoryParams struct {
-	OccurrenceId     UUID
 	TicketCategoryId UUID
 }
 
 func unpackGetOrgTicketCategoryParams(packed middleware.Parameters) (params GetOrgTicketCategoryParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "ticketCategoryId",
@@ -1854,64 +1690,12 @@ func unpackGetOrgTicketCategoryParams(packed middleware.Parameters) (params GetO
 	return params
 }
 
-func decodeGetOrgTicketCategoryParams(args [2]string, argsEscaped bool, r *http.Request) (params GetOrgTicketCategoryParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeGetOrgTicketCategoryParams(args [1]string, argsEscaped bool, r *http.Request) (params GetOrgTicketCategoryParams, _ error) {
+	// Decode path: ticketCategoryId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: ticketCategoryId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -2999,8 +2783,9 @@ func decodeListMyTicketsParams(args [0]string, argsEscaped bool, r *http.Request
 
 // ListOrgEventsParams is parameters of listOrgEvents operation.
 type ListOrgEventsParams struct {
-	Page     OptInt `json:",omitempty,omitzero"`
-	PageSize OptInt `json:",omitempty,omitzero"`
+	Page        OptInt `json:",omitempty,omitzero"`
+	PageSize    OptInt `json:",omitempty,omitzero"`
+	OrganizerId UUID
 }
 
 func unpackListOrgEventsParams(packed middleware.Parameters) (params ListOrgEventsParams) {
@@ -3022,10 +2807,17 @@ func unpackListOrgEventsParams(packed middleware.Parameters) (params ListOrgEven
 			params.PageSize = v.(OptInt)
 		}
 	}
+	{
+		key := middleware.ParameterKey{
+			Name: "organizerId",
+			In:   "path",
+		}
+		params.OrganizerId = packed[key].(UUID)
+	}
 	return params
 }
 
-func decodeListOrgEventsParams(args [0]string, argsEscaped bool, r *http.Request) (params ListOrgEventsParams, _ error) {
+func decodeListOrgEventsParams(args [1]string, argsEscaped bool, r *http.Request) (params ListOrgEventsParams, _ error) {
 	q := uri.NewQueryDecoder(r.URL.Query())
 	// Set default value for query: page.
 	{
@@ -3166,6 +2958,130 @@ func decodeListOrgEventsParams(args [0]string, argsEscaped bool, r *http.Request
 		return params, &ogenerrors.DecodeParamError{
 			Name: "pageSize",
 			In:   "query",
+			Err:  err,
+		}
+	}
+	// Decode path: organizerId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "organizerId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotOrganizerIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrganizerIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OrganizerId = UUID(paramsDotOrganizerIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "organizerId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// ListOrgMembersParams is parameters of listOrgMembers operation.
+type ListOrgMembersParams struct {
+	OrganizerId UUID
+}
+
+func unpackListOrgMembersParams(packed middleware.Parameters) (params ListOrgMembersParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "organizerId",
+			In:   "path",
+		}
+		params.OrganizerId = packed[key].(UUID)
+	}
+	return params
+}
+
+func decodeListOrgMembersParams(args [1]string, argsEscaped bool, r *http.Request) (params ListOrgMembersParams, _ error) {
+	// Decode path: organizerId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "organizerId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotOrganizerIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrganizerIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OrganizerId = UUID(paramsDotOrganizerIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "organizerId",
+			In:   "path",
 			Err:  err,
 		}
 	}
@@ -5739,18 +5655,10 @@ func decodeListPublicUpcomingEventsParams(args [0]string, argsEscaped bool, r *h
 
 // PostponeOrgOccurrenceParams is parameters of postponeOrgOccurrence operation.
 type PostponeOrgOccurrenceParams struct {
-	EventId      UUID
 	OccurrenceId UUID
 }
 
 func unpackPostponeOrgOccurrenceParams(packed middleware.Parameters) (params PostponeOrgOccurrenceParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "eventId",
-			In:   "path",
-		}
-		params.EventId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "occurrenceId",
@@ -5761,64 +5669,12 @@ func unpackPostponeOrgOccurrenceParams(packed middleware.Parameters) (params Pos
 	return params
 }
 
-func decodePostponeOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.Request) (params PostponeOrgOccurrenceParams, _ error) {
-	// Decode path: eventId.
+func decodePostponeOrgOccurrenceParams(args [1]string, argsEscaped bool, r *http.Request) (params PostponeOrgOccurrenceParams, _ error) {
+	// Decode path: occurrenceId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "eventId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotEventIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEventIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EventId = UUID(paramsDotEventIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "eventId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: occurrenceId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -6013,6 +5869,138 @@ func decodeRejectAdminOrganizerApplicationParams(args [1]string, argsEscaped boo
 	return params, nil
 }
 
+// RemoveOrgMemberParams is parameters of removeOrgMember operation.
+type RemoveOrgMemberParams struct {
+	OrganizerId UUID
+	AccountId   UUID
+}
+
+func unpackRemoveOrgMemberParams(packed middleware.Parameters) (params RemoveOrgMemberParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "organizerId",
+			In:   "path",
+		}
+		params.OrganizerId = packed[key].(UUID)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "accountId",
+			In:   "path",
+		}
+		params.AccountId = packed[key].(UUID)
+	}
+	return params
+}
+
+func decodeRemoveOrgMemberParams(args [2]string, argsEscaped bool, r *http.Request) (params RemoveOrgMemberParams, _ error) {
+	// Decode path: organizerId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "organizerId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotOrganizerIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotOrganizerIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.OrganizerId = UUID(paramsDotOrganizerIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "organizerId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode path: accountId.
+	if err := func() error {
+		param := args[1]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "accountId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotAccountIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAccountIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AccountId = UUID(paramsDotAccountIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "accountId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // RequestChangesAdminOrganizerApplicationParams is parameters of requestChangesAdminOrganizerApplication operation.
 type RequestChangesAdminOrganizerApplicationParams struct {
 	OrganizerApplicationId UUID
@@ -6087,18 +6075,10 @@ func decodeRequestChangesAdminOrganizerApplicationParams(args [1]string, argsEsc
 
 // RescheduleOrgOccurrenceParams is parameters of rescheduleOrgOccurrence operation.
 type RescheduleOrgOccurrenceParams struct {
-	EventId      UUID
 	OccurrenceId UUID
 }
 
 func unpackRescheduleOrgOccurrenceParams(packed middleware.Parameters) (params RescheduleOrgOccurrenceParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "eventId",
-			In:   "path",
-		}
-		params.EventId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "occurrenceId",
@@ -6109,64 +6089,12 @@ func unpackRescheduleOrgOccurrenceParams(packed middleware.Parameters) (params R
 	return params
 }
 
-func decodeRescheduleOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.Request) (params RescheduleOrgOccurrenceParams, _ error) {
-	// Decode path: eventId.
+func decodeRescheduleOrgOccurrenceParams(args [1]string, argsEscaped bool, r *http.Request) (params RescheduleOrgOccurrenceParams, _ error) {
+	// Decode path: occurrenceId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "eventId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotEventIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotEventIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.EventId = UUID(paramsDotEventIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "eventId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: occurrenceId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -6291,18 +6219,10 @@ func decodeResubmitMyOrganizerApplicationParams(args [1]string, argsEscaped bool
 
 // StartOrgSalePhaseParams is parameters of startOrgSalePhase operation.
 type StartOrgSalePhaseParams struct {
-	OccurrenceId UUID
-	SalePhaseId  UUID
+	SalePhaseId UUID
 }
 
 func unpackStartOrgSalePhaseParams(packed middleware.Parameters) (params StartOrgSalePhaseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "salePhaseId",
@@ -6313,64 +6233,12 @@ func unpackStartOrgSalePhaseParams(packed middleware.Parameters) (params StartOr
 	return params
 }
 
-func decodeStartOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Request) (params StartOrgSalePhaseParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeStartOrgSalePhaseParams(args [1]string, argsEscaped bool, r *http.Request) (params StartOrgSalePhaseParams, _ error) {
+	// Decode path: salePhaseId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: salePhaseId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -6495,18 +6363,10 @@ func decodeSuspendAdminOrganizerParams(args [1]string, argsEscaped bool, r *http
 
 // SuspendOrgSalePhaseParams is parameters of suspendOrgSalePhase operation.
 type SuspendOrgSalePhaseParams struct {
-	OccurrenceId UUID
-	SalePhaseId  UUID
+	SalePhaseId UUID
 }
 
 func unpackSuspendOrgSalePhaseParams(packed middleware.Parameters) (params SuspendOrgSalePhaseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "salePhaseId",
@@ -6517,64 +6377,12 @@ func unpackSuspendOrgSalePhaseParams(packed middleware.Parameters) (params Suspe
 	return params
 }
 
-func decodeSuspendOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Request) (params SuspendOrgSalePhaseParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeSuspendOrgSalePhaseParams(args [1]string, argsEscaped bool, r *http.Request) (params SuspendOrgSalePhaseParams, _ error) {
+	// Decode path: salePhaseId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: salePhaseId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -6627,7 +6435,7 @@ func decodeSuspendOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.R
 
 // UpdateAdminCategoryParams is parameters of updateAdminCategory operation.
 type UpdateAdminCategoryParams struct {
-	CategoryId int
+	CategoryId int64
 }
 
 func unpackUpdateAdminCategoryParams(packed middleware.Parameters) (params UpdateAdminCategoryParams) {
@@ -6636,7 +6444,7 @@ func unpackUpdateAdminCategoryParams(packed middleware.Parameters) (params Updat
 			Name: "categoryId",
 			In:   "path",
 		}
-		params.CategoryId = packed[key].(int)
+		params.CategoryId = packed[key].(int64)
 	}
 	return params
 }
@@ -6666,7 +6474,7 @@ func decodeUpdateAdminCategoryParams(args [1]string, argsEscaped bool, r *http.R
 					return err
 				}
 
-				c, err := conv.ToInt(val)
+				c, err := conv.ToInt64(val)
 				if err != nil {
 					return err
 				}
@@ -6914,32 +6722,32 @@ func decodeUpdateOrgEventParams(args [1]string, argsEscaped bool, r *http.Reques
 	return params, nil
 }
 
-// UpdateOrgOccurrenceParams is parameters of updateOrgOccurrence operation.
-type UpdateOrgOccurrenceParams struct {
-	EventId      UUID
-	OccurrenceId UUID
+// UpdateOrgMemberParams is parameters of updateOrgMember operation.
+type UpdateOrgMemberParams struct {
+	OrganizerId UUID
+	AccountId   UUID
 }
 
-func unpackUpdateOrgOccurrenceParams(packed middleware.Parameters) (params UpdateOrgOccurrenceParams) {
+func unpackUpdateOrgMemberParams(packed middleware.Parameters) (params UpdateOrgMemberParams) {
 	{
 		key := middleware.ParameterKey{
-			Name: "eventId",
+			Name: "organizerId",
 			In:   "path",
 		}
-		params.EventId = packed[key].(UUID)
+		params.OrganizerId = packed[key].(UUID)
 	}
 	{
 		key := middleware.ParameterKey{
-			Name: "occurrenceId",
+			Name: "accountId",
 			In:   "path",
 		}
-		params.OccurrenceId = packed[key].(UUID)
+		params.AccountId = packed[key].(UUID)
 	}
 	return params
 }
 
-func decodeUpdateOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateOrgOccurrenceParams, _ error) {
-	// Decode path: eventId.
+func decodeUpdateOrgMemberParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateOrgMemberParams, _ error) {
+	// Decode path: organizerId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
@@ -6951,14 +6759,14 @@ func decodeUpdateOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.R
 		}
 		if len(param) > 0 {
 			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "eventId",
+				Param:   "organizerId",
 				Value:   param,
 				Style:   uri.PathStyleSimple,
 				Explode: false,
 			})
 
 			if err := func() error {
-				var paramsDotEventIdVal uuid.UUID
+				var paramsDotOrganizerIdVal uuid.UUID
 				if err := func() error {
 					val, err := d.DecodeValue()
 					if err != nil {
@@ -6970,12 +6778,12 @@ func decodeUpdateOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.R
 						return err
 					}
 
-					paramsDotEventIdVal = c
+					paramsDotOrganizerIdVal = c
 					return nil
 				}(); err != nil {
 					return err
 				}
-				params.EventId = UUID(paramsDotEventIdVal)
+				params.OrganizerId = UUID(paramsDotOrganizerIdVal)
 				return nil
 			}(); err != nil {
 				return err
@@ -6986,16 +6794,88 @@ func decodeUpdateOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.R
 		return nil
 	}(); err != nil {
 		return params, &ogenerrors.DecodeParamError{
-			Name: "eventId",
+			Name: "organizerId",
 			In:   "path",
 			Err:  err,
 		}
 	}
-	// Decode path: occurrenceId.
+	// Decode path: accountId.
 	if err := func() error {
 		param := args[1]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[1])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "accountId",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				var paramsDotAccountIdVal uuid.UUID
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToUUID(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotAccountIdVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.AccountId = UUID(paramsDotAccountIdVal)
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "accountId",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
+// UpdateOrgOccurrenceParams is parameters of updateOrgOccurrence operation.
+type UpdateOrgOccurrenceParams struct {
+	OccurrenceId UUID
+}
+
+func unpackUpdateOrgOccurrenceParams(packed middleware.Parameters) (params UpdateOrgOccurrenceParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "occurrenceId",
+			In:   "path",
+		}
+		params.OccurrenceId = packed[key].(UUID)
+	}
+	return params
+}
+
+func decodeUpdateOrgOccurrenceParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateOrgOccurrenceParams, _ error) {
+	// Decode path: occurrenceId.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -7048,18 +6928,10 @@ func decodeUpdateOrgOccurrenceParams(args [2]string, argsEscaped bool, r *http.R
 
 // UpdateOrgSalePhaseParams is parameters of updateOrgSalePhase operation.
 type UpdateOrgSalePhaseParams struct {
-	OccurrenceId UUID
-	SalePhaseId  UUID
+	SalePhaseId UUID
 }
 
 func unpackUpdateOrgSalePhaseParams(packed middleware.Parameters) (params UpdateOrgSalePhaseParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "salePhaseId",
@@ -7070,64 +6942,12 @@ func unpackUpdateOrgSalePhaseParams(packed middleware.Parameters) (params Update
 	return params
 }
 
-func decodeUpdateOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateOrgSalePhaseParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeUpdateOrgSalePhaseParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateOrgSalePhaseParams, _ error) {
+	// Decode path: salePhaseId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: salePhaseId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}
@@ -7180,18 +7000,10 @@ func decodeUpdateOrgSalePhaseParams(args [2]string, argsEscaped bool, r *http.Re
 
 // UpdateOrgTicketCategoryParams is parameters of updateOrgTicketCategory operation.
 type UpdateOrgTicketCategoryParams struct {
-	OccurrenceId     UUID
 	TicketCategoryId UUID
 }
 
 func unpackUpdateOrgTicketCategoryParams(packed middleware.Parameters) (params UpdateOrgTicketCategoryParams) {
-	{
-		key := middleware.ParameterKey{
-			Name: "occurrenceId",
-			In:   "path",
-		}
-		params.OccurrenceId = packed[key].(UUID)
-	}
 	{
 		key := middleware.ParameterKey{
 			Name: "ticketCategoryId",
@@ -7202,64 +7014,12 @@ func unpackUpdateOrgTicketCategoryParams(packed middleware.Parameters) (params U
 	return params
 }
 
-func decodeUpdateOrgTicketCategoryParams(args [2]string, argsEscaped bool, r *http.Request) (params UpdateOrgTicketCategoryParams, _ error) {
-	// Decode path: occurrenceId.
+func decodeUpdateOrgTicketCategoryParams(args [1]string, argsEscaped bool, r *http.Request) (params UpdateOrgTicketCategoryParams, _ error) {
+	// Decode path: ticketCategoryId.
 	if err := func() error {
 		param := args[0]
 		if argsEscaped {
 			unescaped, err := url.PathUnescape(args[0])
-			if err != nil {
-				return errors.Wrap(err, "unescape path")
-			}
-			param = unescaped
-		}
-		if len(param) > 0 {
-			d := uri.NewPathDecoder(uri.PathDecoderConfig{
-				Param:   "occurrenceId",
-				Value:   param,
-				Style:   uri.PathStyleSimple,
-				Explode: false,
-			})
-
-			if err := func() error {
-				var paramsDotOccurrenceIdVal uuid.UUID
-				if err := func() error {
-					val, err := d.DecodeValue()
-					if err != nil {
-						return err
-					}
-
-					c, err := conv.ToUUID(val)
-					if err != nil {
-						return err
-					}
-
-					paramsDotOccurrenceIdVal = c
-					return nil
-				}(); err != nil {
-					return err
-				}
-				params.OccurrenceId = UUID(paramsDotOccurrenceIdVal)
-				return nil
-			}(); err != nil {
-				return err
-			}
-		} else {
-			return validate.ErrFieldRequired
-		}
-		return nil
-	}(); err != nil {
-		return params, &ogenerrors.DecodeParamError{
-			Name: "occurrenceId",
-			In:   "path",
-			Err:  err,
-		}
-	}
-	// Decode path: ticketCategoryId.
-	if err := func() error {
-		param := args[1]
-		if argsEscaped {
-			unescaped, err := url.PathUnescape(args[1])
 			if err != nil {
 				return errors.Wrap(err, "unescape path")
 			}

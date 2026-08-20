@@ -5,42 +5,14 @@ get:
   x-ogen-operation-group: Categories
   summary: Get a category
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - name: categoryId
       in: path
       required: true
       schema:
         type: integer
-  responses:
-    '200':
-      description: Successful response.
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/Category.yaml
-    '401':
-      $ref: ../components/responses/Unauthorized.yaml
-    '403':
-      $ref: ../components/responses/Forbidden.yaml
-    '404':
-      $ref: ../components/responses/NotFound.yaml
-    default:
-      $ref: ../components/responses/Default.yaml
-patch:
-  tags:
-    - Admin Categories
-  operationId: updateAdminCategory
-  x-ogen-operation-group: Categories
-  summary: Update a category
-  security:
-    - bearerAuth: []
-  parameters:
-    - name: categoryId
-      in: path
-      required: true
-      schema:
-        type: integer
+        format: int64
   responses:
     '200':
       description: Successful response.
@@ -56,5 +28,45 @@ patch:
       $ref: ../components/responses/Forbidden.yaml
     '404':
       $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+put:
+  tags:
+    - Admin Categories
+  operationId: updateAdminCategory
+  x-ogen-operation-group: Categories
+  summary: Replace a category
+  security:
+    - adminAuth: []
+  parameters:
+    - name: categoryId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateCategoryRequest.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Category.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml

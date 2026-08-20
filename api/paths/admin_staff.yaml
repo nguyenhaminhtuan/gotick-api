@@ -1,0 +1,21 @@
+get:
+  tags:
+    - Admin Staff
+  operationId: listAdminStaff
+  x-ogen-operation-group: Staff
+  summary: List platform staff
+  security:
+    - adminAuth: []
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/PlatformStaffList.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

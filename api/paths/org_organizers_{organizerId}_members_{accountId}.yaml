@@ -1,0 +1,66 @@
+parameters:
+  - name: organizerId
+    in: path
+    required: true
+    schema:
+      $ref: ../components/schemas/UUID.yaml
+  - name: accountId
+    in: path
+    required: true
+    schema:
+      $ref: ../components/schemas/UUID.yaml
+patch:
+  tags:
+    - Organizer Members
+  operationId: updateOrgMember
+  x-ogen-operation-group: Members
+  summary: Change a member's role
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateOrganizerMemberRequest.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/OrganizerMember.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+delete:
+  tags:
+    - Organizer Members
+  operationId: removeOrgMember
+  x-ogen-operation-group: Members
+  summary: Remove a member
+  description: >-
+    Removing the last owner is refused: an organizer without an owner has nobody
+    who can manage it.
+  responses:
+    '204':
+      description: Resource deleted.
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

@@ -1,15 +1,10 @@
 post:
   tags:
     - Organizer Sale Phases
-  operationId: endOrgSalePhase
+  operationId: startOrgSalePhase
   x-ogen-operation-group: SalePhases
-  summary: End a sale phase
+  summary: Start a sale phase
   parameters:
-    - name: occurrenceId
-      in: path
-      required: true
-      schema:
-        $ref: ../components/schemas/UUID.yaml
     - name: salePhaseId
       in: path
       required: true

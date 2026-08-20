@@ -11,13 +11,16 @@ properties:
     format: int64
   quantity:
     type: integer
+    format: int64
   priority:
     type: integer
+    format: int64
   metadata:
     type: object
     additionalProperties: true
   maxBuyPerCustomer:
     type: integer
+    format: int64
   createdAt:
     type: string
     format: date-time

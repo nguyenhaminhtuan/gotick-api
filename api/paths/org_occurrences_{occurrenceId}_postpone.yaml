@@ -1,16 +1,11 @@
 post:
   tags:
-    - Organizer Sale Phases
-  operationId: cancelOrgSalePhase
-  x-ogen-operation-group: SalePhases
-  summary: Cancel a sale phase
+    - Organizer Occurrences
+  operationId: postponeOrgOccurrence
+  x-ogen-operation-group: Occurrences
+  summary: Postpone an occurrence
   parameters:
     - name: occurrenceId
-      in: path
-      required: true
-      schema:
-        $ref: ../components/schemas/UUID.yaml
-    - name: salePhaseId
       in: path
       required: true
       schema:
@@ -21,7 +16,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/SalePhase.yaml
+            $ref: ../components/schemas/Occurrence.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
     '403':

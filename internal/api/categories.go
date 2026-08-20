@@ -5,78 +5,100 @@ import (
 
 	"gotick/internal/database"
 	"gotick/internal/oas"
+	"gotick/internal/service"
 )
 
-// categoriesHandler serves the Categories operations, across every audience that exposes them.
-type categoriesHandler struct{ deps }
+type categoriesHandler struct{ categories *service.Categories }
 
-// Compile-time check for categoriesHandler.
 var _ oas.CategoriesHandler = (*categoriesHandler)(nil)
 
-// ActivateAdminCategory implements [oas.CategoriesHandler].
 func (h *categoriesHandler) ActivateAdminCategory(ctx context.Context, params oas.ActivateAdminCategoryParams) (oas.ActivateAdminCategoryRes, error) {
-	panic("unimplemented")
+	category, err := h.categories.Activate(ctx, params.CategoryId)
+	if err != nil {
+		return nil, err
+	}
+	return categoryResponse(&category), nil
 }
 
-// CreateAdminCategory implements [oas.CategoriesHandler].
-func (h *categoriesHandler) CreateAdminCategory(ctx context.Context) (oas.CreateAdminCategoryRes, error) {
-	panic("unimplemented")
-}
-
-// DeactivateAdminCategory implements [oas.CategoriesHandler].
 func (h *categoriesHandler) DeactivateAdminCategory(ctx context.Context, params oas.DeactivateAdminCategoryParams) (oas.DeactivateAdminCategoryRes, error) {
-	panic("unimplemented")
+	category, err := h.categories.Deactivate(ctx, params.CategoryId)
+	if err != nil {
+		return nil, err
+	}
+	return categoryResponse(&category), nil
 }
 
-// GetAdminCategory implements [oas.CategoriesHandler].
+func (h *categoriesHandler) CreateAdminCategory(ctx context.Context, req *oas.CreateCategoryRequest) (oas.CreateAdminCategoryRes, error) {
+	category, err := h.categories.Create(ctx, service.CategoryInput{
+		Name:         req.Name,
+		Slug:         string(req.Slug),
+		Icon:         unwrapOpt(req.Icon),
+		DisplayOrder: req.DisplayOrder.Or(0),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return categoryResponse(&category), nil
+}
+
+func (h *categoriesHandler) UpdateAdminCategory(ctx context.Context, req *oas.UpdateCategoryRequest, params oas.UpdateAdminCategoryParams) (oas.UpdateAdminCategoryRes, error) {
+	category, err := h.categories.Update(ctx, params.CategoryId, service.CategoryInput{
+		Name:         req.Name,
+		Slug:         string(req.Slug),
+		Icon:         unwrapOpt(req.Icon),
+		DisplayOrder: req.DisplayOrder.Or(0),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return categoryResponse(&category), nil
+}
+
 func (h *categoriesHandler) GetAdminCategory(ctx context.Context, params oas.GetAdminCategoryParams) (oas.GetAdminCategoryRes, error) {
-	panic("unimplemented")
+	category, err := h.categories.Get(ctx, params.CategoryId)
+	if err != nil {
+		return nil, err
+	}
+	return categoryResponse(&category), nil
 }
 
-// ListAdminCategories implements [oas.CategoriesHandler].
 func (h *categoriesHandler) ListAdminCategories(ctx context.Context) (oas.ListAdminCategoriesRes, error) {
-	categories, err := h.db.GetCategories(ctx)
+	categories, err := h.categories.All(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res := mapSlice[oas.CategoryList](categories, toCategory)
+	res := listResponse[oas.CategoryList](categories, categoryResponse)
 	return &res, nil
 }
 
-// ListPublicCategories implements [oas.CategoriesHandler].
 func (h *categoriesHandler) ListPublicCategories(ctx context.Context) (oas.ListPublicCategoriesRes, error) {
-	categories, err := h.db.GetCategories(ctx)
+	categories, err := h.categories.Active(ctx)
 	if err != nil {
 		return nil, err
 	}
-	res := mapSlice[oas.PublicCategoryList](categories, toPublicCategory)
+	res := listResponse[oas.PublicCategoryList](categories, publicCategoryResponse)
 	return &res, nil
 }
 
-// UpdateAdminCategory implements [oas.CategoriesHandler].
-func (h *categoriesHandler) UpdateAdminCategory(ctx context.Context, params oas.UpdateAdminCategoryParams) (oas.UpdateAdminCategoryRes, error) {
-	panic("unimplemented")
-}
-
-func toCategory(c *database.Category) *oas.Category {
+func categoryResponse(c *database.Category) *oas.Category {
 	return &oas.Category{
-		ID:           int(c.ID),
+		ID:           c.ID,
 		Name:         c.Name,
 		Slug:         oas.Slug(c.Slug),
-		Icon:         toOptString(c.Icon),
-		DisplayOrder: int(c.DisplayOrder),
+		Icon:         wrapOpt(c.Icon, oas.NewOptString),
+		DisplayOrder: c.DisplayOrder,
 		Status:       oas.CategoryStatus(c.Status),
 		CreatedAt:    c.CreatedAt,
 		UpdatedAt:    c.UpdatedAt,
 	}
 }
 
-func toPublicCategory(c *database.Category) *oas.PublicCategory {
+func publicCategoryResponse(c *database.Category) *oas.PublicCategory {
 	return &oas.PublicCategory{
-		ID:           int(c.ID),
+		ID:           c.ID,
 		Name:         c.Name,
 		Slug:         oas.Slug(c.Slug),
-		Icon:         toOptString(c.Icon),
-		DisplayOrder: int(c.DisplayOrder),
+		Icon:         wrapOpt(c.Icon, oas.NewOptString),
+		DisplayOrder: c.DisplayOrder,
 	}
 }

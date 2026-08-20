@@ -5,7 +5,7 @@ get:
   x-ogen-operation-group: Cities
   summary: Get a city
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - name: cityCode
       in: path
@@ -34,7 +34,7 @@ patch:
   x-ogen-operation-group: Cities
   summary: Update a city
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - name: cityCode
       in: path

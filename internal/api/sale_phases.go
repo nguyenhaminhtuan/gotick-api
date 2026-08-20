@@ -7,7 +7,7 @@ import (
 )
 
 // salePhasesHandler serves the SalePhases operations, across every audience that exposes them.
-type salePhasesHandler struct{ deps }
+type salePhasesHandler struct{}
 
 // Compile-time check for salePhasesHandler.
 var _ oas.SalePhasesHandler = (*salePhasesHandler)(nil)

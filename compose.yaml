@@ -68,7 +68,7 @@ services:
       - GOOGLE_CLOUD_PROJECT=demo-local-project
 
   openapi-bundle:
-    image: redocly/cli:2.39.0
+    image: redocly/cli:2.40.0
     command: bundle
     volumes:
       - ./redocly.yaml:/spec/redocly.yaml:ro

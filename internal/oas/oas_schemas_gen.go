@@ -15,6 +15,62 @@ func (s *DefaultStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+// Ref: #/components/schemas/AccountSummary
+type AccountSummary struct {
+	ID       UUID   `json:"id"`
+	FullName string `json:"fullName"`
+	Email    string `json:"email"`
+	Avatar   string `json:"avatar"`
+}
+
+// GetID returns the value of ID.
+func (s *AccountSummary) GetID() UUID {
+	return s.ID
+}
+
+// GetFullName returns the value of FullName.
+func (s *AccountSummary) GetFullName() string {
+	return s.FullName
+}
+
+// GetEmail returns the value of Email.
+func (s *AccountSummary) GetEmail() string {
+	return s.Email
+}
+
+// GetAvatar returns the value of Avatar.
+func (s *AccountSummary) GetAvatar() string {
+	return s.Avatar
+}
+
+// SetID sets the value of ID.
+func (s *AccountSummary) SetID(val UUID) {
+	s.ID = val
+}
+
+// SetFullName sets the value of FullName.
+func (s *AccountSummary) SetFullName(val string) {
+	s.FullName = val
+}
+
+// SetEmail sets the value of Email.
+func (s *AccountSummary) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetAvatar sets the value of Avatar.
+func (s *AccountSummary) SetAvatar(val string) {
+	s.Avatar = val
+}
+
+type ActivateAdminCategoryBadRequest Error
+
+func (*ActivateAdminCategoryBadRequest) activateAdminCategoryRes() {}
+
+type ActivateAdminCategoryConflict Error
+
+func (*ActivateAdminCategoryConflict) activateAdminCategoryRes() {}
+
 type ActivateAdminCategoryForbidden Error
 
 func (*ActivateAdminCategoryForbidden) activateAdminCategoryRes() {}
@@ -50,6 +106,77 @@ func (*ActivateAdminOrganizerNotFound) activateAdminOrganizerRes() {}
 type ActivateAdminOrganizerUnauthorized Error
 
 func (*ActivateAdminOrganizerUnauthorized) activateAdminOrganizerRes() {}
+
+type AddOrgMemberBadRequest Error
+
+func (*AddOrgMemberBadRequest) addOrgMemberRes() {}
+
+type AddOrgMemberConflict Error
+
+func (*AddOrgMemberConflict) addOrgMemberRes() {}
+
+type AddOrgMemberForbidden Error
+
+func (*AddOrgMemberForbidden) addOrgMemberRes() {}
+
+type AddOrgMemberNotFound Error
+
+func (*AddOrgMemberNotFound) addOrgMemberRes() {}
+
+type AddOrgMemberUnauthorized Error
+
+func (*AddOrgMemberUnauthorized) addOrgMemberRes() {}
+
+// Ref: #/components/schemas/AddOrganizerMemberRequest
+type AddOrganizerMemberRequest struct {
+	Email string              `json:"email"`
+	Role  OrganizerMemberRole `json:"role"`
+}
+
+// GetEmail returns the value of Email.
+func (s *AddOrganizerMemberRequest) GetEmail() string {
+	return s.Email
+}
+
+// GetRole returns the value of Role.
+func (s *AddOrganizerMemberRequest) GetRole() OrganizerMemberRole {
+	return s.Role
+}
+
+// SetEmail sets the value of Email.
+func (s *AddOrganizerMemberRequest) SetEmail(val string) {
+	s.Email = val
+}
+
+// SetRole sets the value of Role.
+func (s *AddOrganizerMemberRequest) SetRole(val OrganizerMemberRole) {
+	s.Role = val
+}
+
+type AdminAuth struct {
+	Token string
+	Roles []string
+}
+
+// GetToken returns the value of Token.
+func (s *AdminAuth) GetToken() string {
+	return s.Token
+}
+
+// GetRoles returns the value of Roles.
+func (s *AdminAuth) GetRoles() []string {
+	return s.Roles
+}
+
+// SetToken sets the value of Token.
+func (s *AdminAuth) SetToken(val string) {
+	s.Token = val
+}
+
+// SetRoles sets the value of Roles.
+func (s *AdminAuth) SetRoles(val []string) {
+	s.Roles = val
+}
 
 type ApproveAdminOrganizerApplicationForbidden Error
 
@@ -114,18 +241,18 @@ func (*CancelOrgSalePhaseUnauthorized) cancelOrgSalePhaseRes() {}
 
 // Ref: #/components/schemas/Category
 type Category struct {
-	ID           int            `json:"id"`
+	ID           int64          `json:"id"`
 	Name         string         `json:"name"`
 	Slug         Slug           `json:"slug"`
 	Icon         OptString      `json:"icon"`
-	DisplayOrder int            `json:"displayOrder"`
+	DisplayOrder int64          `json:"displayOrder"`
 	Status       CategoryStatus `json:"status"`
 	CreatedAt    time.Time      `json:"createdAt"`
 	UpdatedAt    time.Time      `json:"updatedAt"`
 }
 
 // GetID returns the value of ID.
-func (s *Category) GetID() int {
+func (s *Category) GetID() int64 {
 	return s.ID
 }
 
@@ -145,7 +272,7 @@ func (s *Category) GetIcon() OptString {
 }
 
 // GetDisplayOrder returns the value of DisplayOrder.
-func (s *Category) GetDisplayOrder() int {
+func (s *Category) GetDisplayOrder() int64 {
 	return s.DisplayOrder
 }
 
@@ -165,7 +292,7 @@ func (s *Category) GetUpdatedAt() time.Time {
 }
 
 // SetID sets the value of ID.
-func (s *Category) SetID(val int) {
+func (s *Category) SetID(val int64) {
 	s.ID = val
 }
 
@@ -185,7 +312,7 @@ func (s *Category) SetIcon(val OptString) {
 }
 
 // SetDisplayOrder sets the value of DisplayOrder.
-func (s *Category) SetDisplayOrder(val int) {
+func (s *Category) SetDisplayOrder(val int64) {
 	s.DisplayOrder = val
 }
 
@@ -394,6 +521,10 @@ type CreateAdminCategoryBadRequest Error
 
 func (*CreateAdminCategoryBadRequest) createAdminCategoryRes() {}
 
+type CreateAdminCategoryConflict Error
+
+func (*CreateAdminCategoryConflict) createAdminCategoryRes() {}
+
 type CreateAdminCategoryForbidden Error
 
 func (*CreateAdminCategoryForbidden) createAdminCategoryRes() {}
@@ -414,9 +545,61 @@ type CreateAdminCityUnauthorized Error
 
 func (*CreateAdminCityUnauthorized) createAdminCityRes() {}
 
+// Ref: #/components/schemas/CreateCategoryRequest
+type CreateCategoryRequest struct {
+	Name         string    `json:"name"`
+	Slug         Slug      `json:"slug"`
+	Icon         OptString `json:"icon"`
+	DisplayOrder OptInt64  `json:"displayOrder"`
+}
+
+// GetName returns the value of Name.
+func (s *CreateCategoryRequest) GetName() string {
+	return s.Name
+}
+
+// GetSlug returns the value of Slug.
+func (s *CreateCategoryRequest) GetSlug() Slug {
+	return s.Slug
+}
+
+// GetIcon returns the value of Icon.
+func (s *CreateCategoryRequest) GetIcon() OptString {
+	return s.Icon
+}
+
+// GetDisplayOrder returns the value of DisplayOrder.
+func (s *CreateCategoryRequest) GetDisplayOrder() OptInt64 {
+	return s.DisplayOrder
+}
+
+// SetName sets the value of Name.
+func (s *CreateCategoryRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetSlug sets the value of Slug.
+func (s *CreateCategoryRequest) SetSlug(val Slug) {
+	s.Slug = val
+}
+
+// SetIcon sets the value of Icon.
+func (s *CreateCategoryRequest) SetIcon(val OptString) {
+	s.Icon = val
+}
+
+// SetDisplayOrder sets the value of DisplayOrder.
+func (s *CreateCategoryRequest) SetDisplayOrder(val OptInt64) {
+	s.DisplayOrder = val
+}
+
 type CreateMyOrderBadRequest Error
 
 func (*CreateMyOrderBadRequest) createMyOrderRes() {}
+
+type CreateMyOrderForbidden Error
+
+func (*CreateMyOrderForbidden) createMyOrderRes() {}
 
 type CreateMyOrderUnauthorized Error
 
@@ -426,9 +609,44 @@ type CreateMyOrganizerApplicationBadRequest Error
 
 func (*CreateMyOrganizerApplicationBadRequest) createMyOrganizerApplicationRes() {}
 
+type CreateMyOrganizerApplicationForbidden Error
+
+func (*CreateMyOrganizerApplicationForbidden) createMyOrganizerApplicationRes() {}
+
 type CreateMyOrganizerApplicationUnauthorized Error
 
 func (*CreateMyOrganizerApplicationUnauthorized) createMyOrganizerApplicationRes() {}
+
+type CreateMyProfileBadRequest Error
+
+func (*CreateMyProfileBadRequest) createMyProfileRes() {}
+
+type CreateMyProfileConflict Error
+
+func (*CreateMyProfileConflict) createMyProfileRes() {}
+
+type CreateMyProfileForbidden Error
+
+func (*CreateMyProfileForbidden) createMyProfileRes() {}
+
+// Ref: #/components/schemas/CreateMyProfileRequest
+type CreateMyProfileRequest struct {
+	FullName string `json:"fullName"`
+}
+
+// GetFullName returns the value of FullName.
+func (s *CreateMyProfileRequest) GetFullName() string {
+	return s.FullName
+}
+
+// SetFullName sets the value of FullName.
+func (s *CreateMyProfileRequest) SetFullName(val string) {
+	s.FullName = val
+}
+
+type CreateMyProfileUnauthorized Error
+
+func (*CreateMyProfileUnauthorized) createMyProfileRes() {}
 
 type CreateOrgEventBadRequest Error
 
@@ -437,6 +655,10 @@ func (*CreateOrgEventBadRequest) createOrgEventRes() {}
 type CreateOrgEventForbidden Error
 
 func (*CreateOrgEventForbidden) createOrgEventRes() {}
+
+type CreateOrgEventNotFound Error
+
+func (*CreateOrgEventNotFound) createOrgEventRes() {}
 
 type CreateOrgEventUnauthorized Error
 
@@ -489,6 +711,14 @@ func (*CreateOrgTicketCategoryNotFound) createOrgTicketCategoryRes() {}
 type CreateOrgTicketCategoryUnauthorized Error
 
 func (*CreateOrgTicketCategoryUnauthorized) createOrgTicketCategoryRes() {}
+
+type DeactivateAdminCategoryBadRequest Error
+
+func (*DeactivateAdminCategoryBadRequest) deactivateAdminCategoryRes() {}
+
+type DeactivateAdminCategoryConflict Error
+
+func (*DeactivateAdminCategoryConflict) deactivateAdminCategoryRes() {}
 
 type DeactivateAdminCategoryForbidden Error
 
@@ -578,7 +808,6 @@ func (s *Error) SetMessage(val string) {
 	s.Message = val
 }
 
-func (*Error) getMyProfileRes()             {}
 func (*Error) getPublicEventRes()           {}
 func (*Error) getPublicOrganizerRes()       {}
 func (*Error) listPublicCategoriesRes()     {}
@@ -783,6 +1012,10 @@ func (s *EventStatus) UnmarshalText(data []byte) error {
 	}
 }
 
+type GetAdminCategoryBadRequest Error
+
+func (*GetAdminCategoryBadRequest) getAdminCategoryRes() {}
+
 type GetAdminCategoryForbidden Error
 
 func (*GetAdminCategoryForbidden) getAdminCategoryRes() {}
@@ -807,6 +1040,10 @@ type GetAdminCityUnauthorized Error
 
 func (*GetAdminCityUnauthorized) getAdminCityRes() {}
 
+type GetMyOrderForbidden Error
+
+func (*GetMyOrderForbidden) getMyOrderRes() {}
+
 type GetMyOrderNotFound Error
 
 func (*GetMyOrderNotFound) getMyOrderRes() {}
@@ -815,6 +1052,10 @@ type GetMyOrderUnauthorized Error
 
 func (*GetMyOrderUnauthorized) getMyOrderRes() {}
 
+type GetMyOrganizerApplicationForbidden Error
+
+func (*GetMyOrganizerApplicationForbidden) getMyOrganizerApplicationRes() {}
+
 type GetMyOrganizerApplicationNotFound Error
 
 func (*GetMyOrganizerApplicationNotFound) getMyOrganizerApplicationRes() {}
@@ -822,6 +1063,18 @@ func (*GetMyOrganizerApplicationNotFound) getMyOrganizerApplicationRes() {}
 type GetMyOrganizerApplicationUnauthorized Error
 
 func (*GetMyOrganizerApplicationUnauthorized) getMyOrganizerApplicationRes() {}
+
+type GetMyProfileForbidden Error
+
+func (*GetMyProfileForbidden) getMyProfileRes() {}
+
+type GetMyProfileUnauthorized Error
+
+func (*GetMyProfileUnauthorized) getMyProfileRes() {}
+
+type GetMyTicketForbidden Error
+
+func (*GetMyTicketForbidden) getMyTicketRes() {}
 
 type GetMyTicketNotFound Error
 
@@ -919,9 +1172,21 @@ type ListAdminOrganizersUnauthorized Error
 
 func (*ListAdminOrganizersUnauthorized) listAdminOrganizersRes() {}
 
+type ListAdminStaffForbidden Error
+
+func (*ListAdminStaffForbidden) listAdminStaffRes() {}
+
+type ListAdminStaffUnauthorized Error
+
+func (*ListAdminStaffUnauthorized) listAdminStaffRes() {}
+
 type ListMyOrdersBadRequest Error
 
 func (*ListMyOrdersBadRequest) listMyOrdersRes() {}
+
+type ListMyOrdersForbidden Error
+
+func (*ListMyOrdersForbidden) listMyOrdersRes() {}
 
 type ListMyOrdersUnauthorized Error
 
@@ -931,6 +1196,10 @@ type ListMyOrganizerApplicationsBadRequest Error
 
 func (*ListMyOrganizerApplicationsBadRequest) listMyOrganizerApplicationsRes() {}
 
+type ListMyOrganizerApplicationsForbidden Error
+
+func (*ListMyOrganizerApplicationsForbidden) listMyOrganizerApplicationsRes() {}
+
 type ListMyOrganizerApplicationsUnauthorized Error
 
 func (*ListMyOrganizerApplicationsUnauthorized) listMyOrganizerApplicationsRes() {}
@@ -938,6 +1207,10 @@ func (*ListMyOrganizerApplicationsUnauthorized) listMyOrganizerApplicationsRes()
 type ListMyTicketsBadRequest Error
 
 func (*ListMyTicketsBadRequest) listMyTicketsRes() {}
+
+type ListMyTicketsForbidden Error
+
+func (*ListMyTicketsForbidden) listMyTicketsRes() {}
 
 type ListMyTicketsUnauthorized Error
 
@@ -951,9 +1224,29 @@ type ListOrgEventsForbidden Error
 
 func (*ListOrgEventsForbidden) listOrgEventsRes() {}
 
+type ListOrgEventsNotFound Error
+
+func (*ListOrgEventsNotFound) listOrgEventsRes() {}
+
 type ListOrgEventsUnauthorized Error
 
 func (*ListOrgEventsUnauthorized) listOrgEventsRes() {}
+
+type ListOrgMembersBadRequest Error
+
+func (*ListOrgMembersBadRequest) listOrgMembersRes() {}
+
+type ListOrgMembersForbidden Error
+
+func (*ListOrgMembersForbidden) listOrgMembersRes() {}
+
+type ListOrgMembersNotFound Error
+
+func (*ListOrgMembersNotFound) listOrgMembersRes() {}
+
+type ListOrgMembersUnauthorized Error
+
+func (*ListOrgMembersUnauthorized) listOrgMembersRes() {}
 
 type ListOrgOccurrencesBadRequest Error
 
@@ -1287,7 +1580,8 @@ func (s *MyProfile) SetAvatar(val string) {
 	s.Avatar = val
 }
 
-func (*MyProfile) getMyProfileRes() {}
+func (*MyProfile) createMyProfileRes() {}
+func (*MyProfile) getMyProfileRes()    {}
 
 // Ref: #/components/schemas/MyTicket
 type MyTicket struct {
@@ -1645,6 +1939,52 @@ func (o OptInt) Or(d int) int {
 	return d
 }
 
+// NewOptInt64 returns new OptInt64 with value set to v.
+func NewOptInt64(v int64) OptInt64 {
+	return OptInt64{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt64 is optional int64.
+type OptInt64 struct {
+	Value int64
+	Set   bool
+}
+
+// IsSet returns true if OptInt64 was set.
+func (o OptInt64) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt64) Reset() {
+	var v int64
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt64) SetTo(v int64) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt64) Get() (v int64, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt64) Or(d int64) int64 {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {
 	return OptString{
@@ -1685,6 +2025,52 @@ func (o OptString) Get() (v string, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
+// NewOptUUID returns new OptUUID with value set to v.
+func NewOptUUID(v UUID) OptUUID {
+	return OptUUID{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUUID is optional UUID.
+type OptUUID struct {
+	Value UUID
+	Set   bool
+}
+
+// IsSet returns true if OptUUID was set.
+func (o OptUUID) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUUID) Reset() {
+	var v UUID
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUUID) SetTo(v UUID) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUUID) Get() (v UUID, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUUID) Or(d UUID) UUID {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -2035,6 +2421,103 @@ type OrganizerList []Organizer
 
 func (*OrganizerList) listAdminOrganizersRes() {}
 
+// Ref: #/components/schemas/OrganizerMember
+type OrganizerMember struct {
+	Account   AccountSummary      `json:"account"`
+	Role      OrganizerMemberRole `json:"role"`
+	CreatedAt time.Time           `json:"createdAt"`
+	UpdatedAt time.Time           `json:"updatedAt"`
+}
+
+// GetAccount returns the value of Account.
+func (s *OrganizerMember) GetAccount() AccountSummary {
+	return s.Account
+}
+
+// GetRole returns the value of Role.
+func (s *OrganizerMember) GetRole() OrganizerMemberRole {
+	return s.Role
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *OrganizerMember) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *OrganizerMember) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetAccount sets the value of Account.
+func (s *OrganizerMember) SetAccount(val AccountSummary) {
+	s.Account = val
+}
+
+// SetRole sets the value of Role.
+func (s *OrganizerMember) SetRole(val OrganizerMemberRole) {
+	s.Role = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *OrganizerMember) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *OrganizerMember) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+func (*OrganizerMember) addOrgMemberRes()    {}
+func (*OrganizerMember) updateOrgMemberRes() {}
+
+type OrganizerMemberList []OrganizerMember
+
+func (*OrganizerMemberList) listOrgMembersRes() {}
+
+// Ref: #/components/schemas/OrganizerMemberRole
+type OrganizerMemberRole string
+
+const (
+	OrganizerMemberRoleOwner OrganizerMemberRole = "owner"
+	OrganizerMemberRoleStaff OrganizerMemberRole = "staff"
+)
+
+// AllValues returns all OrganizerMemberRole values.
+func (OrganizerMemberRole) AllValues() []OrganizerMemberRole {
+	return []OrganizerMemberRole{
+		OrganizerMemberRoleOwner,
+		OrganizerMemberRoleStaff,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s OrganizerMemberRole) MarshalText() ([]byte, error) {
+	switch s {
+	case OrganizerMemberRoleOwner:
+		return []byte(s), nil
+	case OrganizerMemberRoleStaff:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *OrganizerMemberRole) UnmarshalText(data []byte) error {
+	switch OrganizerMemberRole(data) {
+	case OrganizerMemberRoleOwner:
+		*s = OrganizerMemberRoleOwner
+		return nil
+	case OrganizerMemberRoleStaff:
+		*s = OrganizerMemberRoleStaff
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type OrganizerPublicContact map[string]jx.Raw
 
 func (s *OrganizerPublicContact) init() OrganizerPublicContact {
@@ -2137,6 +2620,111 @@ func (s *OrganizerType) UnmarshalText(data []byte) error {
 	}
 }
 
+// Ref: #/components/schemas/PlatformStaff
+type PlatformStaff struct {
+	Account   AccountSummary    `json:"account"`
+	Role      PlatformStaffRole `json:"role"`
+	GrantedBy OptUUID           `json:"grantedBy"`
+	CreatedAt time.Time         `json:"createdAt"`
+	UpdatedAt time.Time         `json:"updatedAt"`
+}
+
+// GetAccount returns the value of Account.
+func (s *PlatformStaff) GetAccount() AccountSummary {
+	return s.Account
+}
+
+// GetRole returns the value of Role.
+func (s *PlatformStaff) GetRole() PlatformStaffRole {
+	return s.Role
+}
+
+// GetGrantedBy returns the value of GrantedBy.
+func (s *PlatformStaff) GetGrantedBy() OptUUID {
+	return s.GrantedBy
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *PlatformStaff) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUpdatedAt returns the value of UpdatedAt.
+func (s *PlatformStaff) GetUpdatedAt() time.Time {
+	return s.UpdatedAt
+}
+
+// SetAccount sets the value of Account.
+func (s *PlatformStaff) SetAccount(val AccountSummary) {
+	s.Account = val
+}
+
+// SetRole sets the value of Role.
+func (s *PlatformStaff) SetRole(val PlatformStaffRole) {
+	s.Role = val
+}
+
+// SetGrantedBy sets the value of GrantedBy.
+func (s *PlatformStaff) SetGrantedBy(val OptUUID) {
+	s.GrantedBy = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *PlatformStaff) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUpdatedAt sets the value of UpdatedAt.
+func (s *PlatformStaff) SetUpdatedAt(val time.Time) {
+	s.UpdatedAt = val
+}
+
+type PlatformStaffList []PlatformStaff
+
+func (*PlatformStaffList) listAdminStaffRes() {}
+
+// Ref: #/components/schemas/PlatformStaffRole
+type PlatformStaffRole string
+
+const (
+	PlatformStaffRoleOwner PlatformStaffRole = "owner"
+	PlatformStaffRoleStaff PlatformStaffRole = "staff"
+)
+
+// AllValues returns all PlatformStaffRole values.
+func (PlatformStaffRole) AllValues() []PlatformStaffRole {
+	return []PlatformStaffRole{
+		PlatformStaffRoleOwner,
+		PlatformStaffRoleStaff,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s PlatformStaffRole) MarshalText() ([]byte, error) {
+	switch s {
+	case PlatformStaffRoleOwner:
+		return []byte(s), nil
+	case PlatformStaffRoleStaff:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *PlatformStaffRole) UnmarshalText(data []byte) error {
+	switch PlatformStaffRole(data) {
+	case PlatformStaffRoleOwner:
+		*s = PlatformStaffRoleOwner
+		return nil
+	case PlatformStaffRoleStaff:
+		*s = PlatformStaffRoleStaff
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
 type PostponeOrgOccurrenceForbidden Error
 
 func (*PostponeOrgOccurrenceForbidden) postponeOrgOccurrenceRes() {}
@@ -2151,15 +2739,15 @@ func (*PostponeOrgOccurrenceUnauthorized) postponeOrgOccurrenceRes() {}
 
 // Ref: #/components/schemas/PublicCategory
 type PublicCategory struct {
-	ID           int       `json:"id"`
+	ID           int64     `json:"id"`
 	Name         string    `json:"name"`
 	Slug         Slug      `json:"slug"`
 	Icon         OptString `json:"icon"`
-	DisplayOrder int       `json:"displayOrder"`
+	DisplayOrder int64     `json:"displayOrder"`
 }
 
 // GetID returns the value of ID.
-func (s *PublicCategory) GetID() int {
+func (s *PublicCategory) GetID() int64 {
 	return s.ID
 }
 
@@ -2179,12 +2767,12 @@ func (s *PublicCategory) GetIcon() OptString {
 }
 
 // GetDisplayOrder returns the value of DisplayOrder.
-func (s *PublicCategory) GetDisplayOrder() int {
+func (s *PublicCategory) GetDisplayOrder() int64 {
 	return s.DisplayOrder
 }
 
 // SetID sets the value of ID.
-func (s *PublicCategory) SetID(val int) {
+func (s *PublicCategory) SetID(val int64) {
 	s.ID = val
 }
 
@@ -2204,7 +2792,7 @@ func (s *PublicCategory) SetIcon(val OptString) {
 }
 
 // SetDisplayOrder sets the value of DisplayOrder.
-func (s *PublicCategory) SetDisplayOrder(val int) {
+func (s *PublicCategory) SetDisplayOrder(val int64) {
 	s.DisplayOrder = val
 }
 
@@ -2820,7 +3408,7 @@ type PublicTicketCategory struct {
 	Name              string `json:"name"`
 	Zone              string `json:"zone"`
 	Price             int64  `json:"price"`
-	MaxBuyPerCustomer int    `json:"maxBuyPerCustomer"`
+	MaxBuyPerCustomer int64  `json:"maxBuyPerCustomer"`
 }
 
 // GetID returns the value of ID.
@@ -2844,7 +3432,7 @@ func (s *PublicTicketCategory) GetPrice() int64 {
 }
 
 // GetMaxBuyPerCustomer returns the value of MaxBuyPerCustomer.
-func (s *PublicTicketCategory) GetMaxBuyPerCustomer() int {
+func (s *PublicTicketCategory) GetMaxBuyPerCustomer() int64 {
 	return s.MaxBuyPerCustomer
 }
 
@@ -2869,7 +3457,7 @@ func (s *PublicTicketCategory) SetPrice(val int64) {
 }
 
 // SetMaxBuyPerCustomer sets the value of MaxBuyPerCustomer.
-func (s *PublicTicketCategory) SetMaxBuyPerCustomer(val int) {
+func (s *PublicTicketCategory) SetMaxBuyPerCustomer(val int64) {
 	s.MaxBuyPerCustomer = val
 }
 
@@ -2901,6 +3489,31 @@ type RejectAdminOrganizerApplicationUnauthorized Error
 
 func (*RejectAdminOrganizerApplicationUnauthorized) rejectAdminOrganizerApplicationRes() {}
 
+type RemoveOrgMemberBadRequest Error
+
+func (*RemoveOrgMemberBadRequest) removeOrgMemberRes() {}
+
+type RemoveOrgMemberConflict Error
+
+func (*RemoveOrgMemberConflict) removeOrgMemberRes() {}
+
+type RemoveOrgMemberForbidden Error
+
+func (*RemoveOrgMemberForbidden) removeOrgMemberRes() {}
+
+// RemoveOrgMemberNoContent is response for RemoveOrgMember operation.
+type RemoveOrgMemberNoContent struct{}
+
+func (*RemoveOrgMemberNoContent) removeOrgMemberRes() {}
+
+type RemoveOrgMemberNotFound Error
+
+func (*RemoveOrgMemberNotFound) removeOrgMemberRes() {}
+
+type RemoveOrgMemberUnauthorized Error
+
+func (*RemoveOrgMemberUnauthorized) removeOrgMemberRes() {}
+
 type RequestChangesAdminOrganizerApplicationForbidden Error
 
 func (*RequestChangesAdminOrganizerApplicationForbidden) requestChangesAdminOrganizerApplicationRes() {
@@ -2927,6 +3540,10 @@ func (*RescheduleOrgOccurrenceNotFound) rescheduleOrgOccurrenceRes() {}
 type RescheduleOrgOccurrenceUnauthorized Error
 
 func (*RescheduleOrgOccurrenceUnauthorized) rescheduleOrgOccurrenceRes() {}
+
+type ResubmitMyOrganizerApplicationForbidden Error
+
+func (*ResubmitMyOrganizerApplicationForbidden) resubmitMyOrganizerApplicationRes() {}
 
 type ResubmitMyOrganizerApplicationNotFound Error
 
@@ -3147,10 +3764,10 @@ type TicketCategory struct {
 	Name              string                 `json:"name"`
 	Zone              string                 `json:"zone"`
 	Price             int64                  `json:"price"`
-	Quantity          int                    `json:"quantity"`
-	Priority          int                    `json:"priority"`
+	Quantity          int64                  `json:"quantity"`
+	Priority          int64                  `json:"priority"`
 	Metadata          TicketCategoryMetadata `json:"metadata"`
-	MaxBuyPerCustomer int                    `json:"maxBuyPerCustomer"`
+	MaxBuyPerCustomer int64                  `json:"maxBuyPerCustomer"`
 	CreatedAt         time.Time              `json:"createdAt"`
 	UpdatedAt         time.Time              `json:"updatedAt"`
 }
@@ -3176,12 +3793,12 @@ func (s *TicketCategory) GetPrice() int64 {
 }
 
 // GetQuantity returns the value of Quantity.
-func (s *TicketCategory) GetQuantity() int {
+func (s *TicketCategory) GetQuantity() int64 {
 	return s.Quantity
 }
 
 // GetPriority returns the value of Priority.
-func (s *TicketCategory) GetPriority() int {
+func (s *TicketCategory) GetPriority() int64 {
 	return s.Priority
 }
 
@@ -3191,7 +3808,7 @@ func (s *TicketCategory) GetMetadata() TicketCategoryMetadata {
 }
 
 // GetMaxBuyPerCustomer returns the value of MaxBuyPerCustomer.
-func (s *TicketCategory) GetMaxBuyPerCustomer() int {
+func (s *TicketCategory) GetMaxBuyPerCustomer() int64 {
 	return s.MaxBuyPerCustomer
 }
 
@@ -3226,12 +3843,12 @@ func (s *TicketCategory) SetPrice(val int64) {
 }
 
 // SetQuantity sets the value of Quantity.
-func (s *TicketCategory) SetQuantity(val int) {
+func (s *TicketCategory) SetQuantity(val int64) {
 	s.Quantity = val
 }
 
 // SetPriority sets the value of Priority.
-func (s *TicketCategory) SetPriority(val int) {
+func (s *TicketCategory) SetPriority(val int64) {
 	s.Priority = val
 }
 
@@ -3241,7 +3858,7 @@ func (s *TicketCategory) SetMetadata(val TicketCategoryMetadata) {
 }
 
 // SetMaxBuyPerCustomer sets the value of MaxBuyPerCustomer.
-func (s *TicketCategory) SetMaxBuyPerCustomer(val int) {
+func (s *TicketCategory) SetMaxBuyPerCustomer(val int64) {
 	s.MaxBuyPerCustomer = val
 }
 
@@ -3343,6 +3960,10 @@ type UpdateAdminCategoryBadRequest Error
 
 func (*UpdateAdminCategoryBadRequest) updateAdminCategoryRes() {}
 
+type UpdateAdminCategoryConflict Error
+
+func (*UpdateAdminCategoryConflict) updateAdminCategoryRes() {}
+
 type UpdateAdminCategoryForbidden Error
 
 func (*UpdateAdminCategoryForbidden) updateAdminCategoryRes() {}
@@ -3371,9 +3992,61 @@ type UpdateAdminCityUnauthorized Error
 
 func (*UpdateAdminCityUnauthorized) updateAdminCityRes() {}
 
+// Ref: #/components/schemas/UpdateCategoryRequest
+type UpdateCategoryRequest struct {
+	Name         string    `json:"name"`
+	Slug         Slug      `json:"slug"`
+	Icon         OptString `json:"icon"`
+	DisplayOrder OptInt64  `json:"displayOrder"`
+}
+
+// GetName returns the value of Name.
+func (s *UpdateCategoryRequest) GetName() string {
+	return s.Name
+}
+
+// GetSlug returns the value of Slug.
+func (s *UpdateCategoryRequest) GetSlug() Slug {
+	return s.Slug
+}
+
+// GetIcon returns the value of Icon.
+func (s *UpdateCategoryRequest) GetIcon() OptString {
+	return s.Icon
+}
+
+// GetDisplayOrder returns the value of DisplayOrder.
+func (s *UpdateCategoryRequest) GetDisplayOrder() OptInt64 {
+	return s.DisplayOrder
+}
+
+// SetName sets the value of Name.
+func (s *UpdateCategoryRequest) SetName(val string) {
+	s.Name = val
+}
+
+// SetSlug sets the value of Slug.
+func (s *UpdateCategoryRequest) SetSlug(val Slug) {
+	s.Slug = val
+}
+
+// SetIcon sets the value of Icon.
+func (s *UpdateCategoryRequest) SetIcon(val OptString) {
+	s.Icon = val
+}
+
+// SetDisplayOrder sets the value of DisplayOrder.
+func (s *UpdateCategoryRequest) SetDisplayOrder(val OptInt64) {
+	s.DisplayOrder = val
+}
+
 type UpdateMyOrganizerApplicationBadRequest Error
 
 func (*UpdateMyOrganizerApplicationBadRequest) updateMyOrganizerApplicationRes() {}
+
+type UpdateMyOrganizerApplicationForbidden Error
+
+func (*UpdateMyOrganizerApplicationForbidden) updateMyOrganizerApplicationRes() {}
 
 type UpdateMyOrganizerApplicationNotFound Error
 
@@ -3398,6 +4071,26 @@ func (*UpdateOrgEventNotFound) updateOrgEventRes() {}
 type UpdateOrgEventUnauthorized Error
 
 func (*UpdateOrgEventUnauthorized) updateOrgEventRes() {}
+
+type UpdateOrgMemberBadRequest Error
+
+func (*UpdateOrgMemberBadRequest) updateOrgMemberRes() {}
+
+type UpdateOrgMemberConflict Error
+
+func (*UpdateOrgMemberConflict) updateOrgMemberRes() {}
+
+type UpdateOrgMemberForbidden Error
+
+func (*UpdateOrgMemberForbidden) updateOrgMemberRes() {}
+
+type UpdateOrgMemberNotFound Error
+
+func (*UpdateOrgMemberNotFound) updateOrgMemberRes() {}
+
+type UpdateOrgMemberUnauthorized Error
+
+func (*UpdateOrgMemberUnauthorized) updateOrgMemberRes() {}
 
 type UpdateOrgOccurrenceBadRequest Error
 
@@ -3446,3 +4139,18 @@ func (*UpdateOrgTicketCategoryNotFound) updateOrgTicketCategoryRes() {}
 type UpdateOrgTicketCategoryUnauthorized Error
 
 func (*UpdateOrgTicketCategoryUnauthorized) updateOrgTicketCategoryRes() {}
+
+// Ref: #/components/schemas/UpdateOrganizerMemberRequest
+type UpdateOrganizerMemberRequest struct {
+	Role OrganizerMemberRole `json:"role"`
+}
+
+// GetRole returns the value of Role.
+func (s *UpdateOrganizerMemberRequest) GetRole() OrganizerMemberRole {
+	return s.Role
+}
+
+// SetRole sets the value of Role.
+func (s *UpdateOrganizerMemberRequest) SetRole(val OrganizerMemberRole) {
+	s.Role = val
+}
