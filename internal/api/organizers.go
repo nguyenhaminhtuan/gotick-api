@@ -7,7 +7,7 @@ import (
 )
 
 // organizersHandler serves the Organizers operations, across every audience that exposes them.
-type organizersHandler struct{ deps }
+type organizersHandler struct{}
 
 // Compile-time check for organizersHandler.
 var _ oas.OrganizersHandler = (*organizersHandler)(nil)

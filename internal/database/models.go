@@ -8,18 +8,20 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Account struct {
-	ID          uuid.UUID
-	FullName    string
-	Email       string
-	Avatar      string
-	Status      string
-	SuspendedAt *time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+	ID             uuid.UUID
+	FullName       string
+	Email          string
+	Avatar         string
+	Status         string
+	SuspendedAt    *time.Time
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	FirebaseUid    string
+	Phone          string
+	PhoneChangedAt time.Time
 }
 
 type Asset struct {
@@ -27,7 +29,7 @@ type Asset struct {
 	StorageKey  string
 	Status      string
 	ContentType string
-	SizeBytes   pgtype.Int8
+	SizeBytes   *int64
 	Checksum    *string
 	CreatedAt   time.Time
 	CommittedAt *time.Time
@@ -56,7 +58,7 @@ type City struct {
 type Event struct {
 	ID          uuid.UUID
 	OrganizerID uuid.UUID
-	CategoryID  pgtype.Int8
+	CategoryID  *int64
 	Name        string
 	Slug        string
 	Description string
@@ -145,6 +147,8 @@ type PlatformStaff struct {
 	AccountID uuid.UUID
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	Role      string
+	GrantedBy *uuid.UUID
 }
 
 type SalePhase struct {

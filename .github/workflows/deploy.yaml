@@ -222,6 +222,42 @@ jobs:
             --image api \
             --tag "${TAG}"
 
+  grant-staff:
+    name: Grant staff
+    needs: [plan, build]
+    # Shares the api image, so it moves whenever that image does. Never
+    # executed here: it grants platform staff, and only by hand.
+    if: ${{ !cancelled() && needs.build.result == 'success' && needs.plan.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: ${{ needs.plan.outputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          workload_identity_provider: ${{ vars.WIF_PROVIDER }}
+          service_account: ${{ vars.DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+
+      - env:
+          PROJECT: ${{ vars.GCP_PROJECT_ID }}
+          REGION: ${{ vars.GCP_REGION }}
+          TAG: ${{ needs.plan.outputs.tag }}
+        run: |
+          scripts/deploy-job.sh \
+            --project "${PROJECT}" \
+            --region "${REGION}" \
+            --repo containers \
+            --image api \
+            --job grant-staff \
+            --tag "${TAG}" \
+            --execute false
+
   docs:
     name: Docs
     needs: [plan, build]

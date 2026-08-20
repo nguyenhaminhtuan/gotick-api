@@ -49,15 +49,15 @@ func (s *Server) handleActivateAdminCategoryRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ActivateAdminCategoryOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ActivateAdminCategoryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -190,15 +190,15 @@ func (s *Server) handleActivateAdminCityRequest(args [1]string, argsEscaped bool
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ActivateAdminCityOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ActivateAdminCityOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -331,15 +331,15 @@ func (s *Server) handleActivateAdminOrganizerRequest(args [1]string, argsEscaped
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ActivateAdminOrganizerOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ActivateAdminOrganizerOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -451,6 +451,163 @@ func (s *Server) handleActivateAdminOrganizerRequest(args [1]string, argsEscaped
 	}
 }
 
+// handleAddOrgMemberRequest handles addOrgMember operation.
+//
+// Adds an existing gotick account to the organizer, found by the email it registered with. Only owners
+// may change the member list.
+//
+// POST /org/organizers/{organizerId}/members
+func (s *Server) handleAddOrgMemberRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	ctx := r.Context()
+
+	var (
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: AddOrgMemberOperation,
+			ID:   "addOrgMember",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, AddOrgMemberOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeAddOrgMemberParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeAddOrgMemberRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response AddOrgMemberRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    AddOrgMemberOperation,
+			OperationSummary: "Add a member",
+			OperationID:      "addOrgMember",
+			Body:             request,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "organizerId",
+					In:   "path",
+				}: params.OrganizerId,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *AddOrganizerMemberRequest
+			Params   = AddOrgMemberParams
+			Response = AddOrgMemberRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackAddOrgMemberParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.AddOrgMember(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.AddOrgMember(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeAddOrgMemberResponse(response, w); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleApproveAdminOrganizerApplicationRequest handles approveAdminOrganizerApplication operation.
 //
 // Approve an organizer application.
@@ -472,15 +629,15 @@ func (s *Server) handleApproveAdminOrganizerApplicationRequest(args [1]string, a
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ApproveAdminOrganizerApplicationOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ApproveAdminOrganizerApplicationOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -596,8 +753,8 @@ func (s *Server) handleApproveAdminOrganizerApplicationRequest(args [1]string, a
 //
 // Cancel an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/cancel
-func (s *Server) handleCancelOrgOccurrenceRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/occurrences/{occurrenceId}/cancel
+func (s *Server) handleCancelOrgOccurrenceRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -679,10 +836,6 @@ func (s *Server) handleCancelOrgOccurrenceRequest(args [2]string, argsEscaped bo
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "eventId",
-					In:   "path",
-				}: params.EventId,
-				{
 					Name: "occurrenceId",
 					In:   "path",
 				}: params.OccurrenceId,
@@ -741,8 +894,8 @@ func (s *Server) handleCancelOrgOccurrenceRequest(args [2]string, argsEscaped bo
 //
 // Cancel a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/cancel
-func (s *Server) handleCancelOrgSalePhaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/sale-phases/{salePhaseId}/cancel
+func (s *Server) handleCancelOrgSalePhaseRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -823,10 +976,6 @@ func (s *Server) handleCancelOrgSalePhaseRequest(args [2]string, argsEscaped boo
 			Body:             nil,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
-				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
 				{
 					Name: "salePhaseId",
 					In:   "path",
@@ -1044,15 +1193,15 @@ func (s *Server) handleCreateAdminCategoryRequest(args [0]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, CreateAdminCategoryOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, CreateAdminCategoryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -1088,6 +1237,21 @@ func (s *Server) handleCreateAdminCategoryRequest(args [0]string, argsEscaped bo
 	}
 
 	var rawBody []byte
+	request, rawBody, close, err := s.decodeCreateAdminCategoryRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
 
 	var response CreateAdminCategoryRes
 	if m := s.cfg.Middleware; m != nil {
@@ -1096,14 +1260,14 @@ func (s *Server) handleCreateAdminCategoryRequest(args [0]string, argsEscaped bo
 			OperationName:    CreateAdminCategoryOperation,
 			OperationSummary: "Create a category",
 			OperationID:      "createAdminCategory",
-			Body:             nil,
+			Body:             request,
 			RawBody:          rawBody,
 			Params:           middleware.Parameters{},
 			Raw:              r,
 		}
 
 		type (
-			Request  = struct{}
+			Request  = *CreateCategoryRequest
 			Params   = struct{}
 			Response = CreateAdminCategoryRes
 		)
@@ -1116,12 +1280,12 @@ func (s *Server) handleCreateAdminCategoryRequest(args [0]string, argsEscaped bo
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.CreateAdminCategory(ctx)
+				response, err = s.h.CreateAdminCategory(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.CreateAdminCategory(ctx)
+		response, err = s.h.CreateAdminCategory(ctx, request)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
@@ -1170,15 +1334,15 @@ func (s *Server) handleCreateAdminCityRequest(args [0]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, CreateAdminCityOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, CreateAdminCityOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -1527,12 +1691,155 @@ func (s *Server) handleCreateMyOrganizerApplicationRequest(args [0]string, argsE
 	}
 }
 
+// handleCreateMyProfileRequest handles createMyProfile operation.
+//
+// Completes account setup for the signed-in identity. Email and phone number are taken from the
+// verified token, never from the body. Calling it again for an identity that already has a profile
+// returns the existing one.
+//
+// POST /me/profile
+func (s *Server) handleCreateMyProfileRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	ctx := r.Context()
+
+	var (
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: CreateMyProfileOperation,
+			ID:   "createMyProfile",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, CreateMyProfileOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeCreateMyProfileRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response CreateMyProfileRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    CreateMyProfileOperation,
+			OperationSummary: "Create my profile",
+			OperationID:      "createMyProfile",
+			Body:             request,
+			RawBody:          rawBody,
+			Params:           middleware.Parameters{},
+			Raw:              r,
+		}
+
+		type (
+			Request  = *CreateMyProfileRequest
+			Params   = struct{}
+			Response = CreateMyProfileRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.CreateMyProfile(ctx, request)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.CreateMyProfile(ctx, request)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeCreateMyProfileResponse(response, w); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleCreateOrgEventRequest handles createOrgEvent operation.
 //
 // Create an event.
 //
-// POST /org/events
-func (s *Server) handleCreateOrgEventRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/organizers/{organizerId}/events
+func (s *Server) handleCreateOrgEventRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -1590,6 +1897,16 @@ func (s *Server) handleCreateOrgEventRequest(args [0]string, argsEscaped bool, w
 			return
 		}
 	}
+	params, err := decodeCreateOrgEventParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
 
 	var rawBody []byte
 
@@ -1602,13 +1919,18 @@ func (s *Server) handleCreateOrgEventRequest(args [0]string, argsEscaped bool, w
 			OperationID:      "createOrgEvent",
 			Body:             nil,
 			RawBody:          rawBody,
-			Params:           middleware.Parameters{},
-			Raw:              r,
+			Params: middleware.Parameters{
+				{
+					Name: "organizerId",
+					In:   "path",
+				}: params.OrganizerId,
+			},
+			Raw: r,
 		}
 
 		type (
 			Request  = struct{}
-			Params   = struct{}
+			Params   = CreateOrgEventParams
 			Response = CreateOrgEventRes
 		)
 		response, err = middleware.HookMiddleware[
@@ -1618,14 +1940,14 @@ func (s *Server) handleCreateOrgEventRequest(args [0]string, argsEscaped bool, w
 		](
 			m,
 			mreq,
-			nil,
+			unpackCreateOrgEventParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.CreateOrgEvent(ctx)
+				response, err = s.h.CreateOrgEvent(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.CreateOrgEvent(ctx)
+		response, err = s.h.CreateOrgEvent(ctx, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
@@ -2097,15 +2419,15 @@ func (s *Server) handleDeactivateAdminCategoryRequest(args [1]string, argsEscape
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, DeactivateAdminCategoryOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, DeactivateAdminCategoryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -2238,15 +2560,15 @@ func (s *Server) handleDeactivateAdminCityRequest(args [1]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, DeactivateAdminCityOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, DeactivateAdminCityOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -2362,8 +2684,8 @@ func (s *Server) handleDeactivateAdminCityRequest(args [1]string, argsEscaped bo
 //
 // End a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/end
-func (s *Server) handleEndOrgSalePhaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/sale-phases/{salePhaseId}/end
+func (s *Server) handleEndOrgSalePhaseRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -2445,10 +2767,6 @@ func (s *Server) handleEndOrgSalePhaseRequest(args [2]string, argsEscaped bool, 
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
-				{
 					Name: "salePhaseId",
 					In:   "path",
 				}: params.SalePhaseId,
@@ -2524,15 +2842,15 @@ func (s *Server) handleGetAdminCategoryRequest(args [1]string, argsEscaped bool,
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, GetAdminCategoryOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, GetAdminCategoryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -2665,15 +2983,15 @@ func (s *Server) handleGetAdminCityRequest(args [1]string, argsEscaped bool, w h
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, GetAdminCityOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, GetAdminCityOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -3479,8 +3797,8 @@ func (s *Server) handleGetOrgEventRequest(args [1]string, argsEscaped bool, w ht
 //
 // Get an occurrence.
 //
-// GET /org/events/{eventId}/occurrences/{occurrenceId}
-func (s *Server) handleGetOrgOccurrenceRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /org/occurrences/{occurrenceId}
+func (s *Server) handleGetOrgOccurrenceRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -3562,10 +3880,6 @@ func (s *Server) handleGetOrgOccurrenceRequest(args [2]string, argsEscaped bool,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "eventId",
-					In:   "path",
-				}: params.EventId,
-				{
 					Name: "occurrenceId",
 					In:   "path",
 				}: params.OccurrenceId,
@@ -3624,8 +3938,8 @@ func (s *Server) handleGetOrgOccurrenceRequest(args [2]string, argsEscaped bool,
 //
 // Get a sale phase.
 //
-// GET /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
-func (s *Server) handleGetOrgSalePhaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /org/sale-phases/{salePhaseId}
+func (s *Server) handleGetOrgSalePhaseRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -3707,10 +4021,6 @@ func (s *Server) handleGetOrgSalePhaseRequest(args [2]string, argsEscaped bool, 
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
-				{
 					Name: "salePhaseId",
 					In:   "path",
 				}: params.SalePhaseId,
@@ -3769,8 +4079,8 @@ func (s *Server) handleGetOrgSalePhaseRequest(args [2]string, argsEscaped bool, 
 //
 // Get a ticket category.
 //
-// GET /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
-func (s *Server) handleGetOrgTicketCategoryRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /org/ticket-categories/{ticketCategoryId}
+func (s *Server) handleGetOrgTicketCategoryRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -3851,10 +4161,6 @@ func (s *Server) handleGetOrgTicketCategoryRequest(args [2]string, argsEscaped b
 			Body:             nil,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
-				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
 				{
 					Name: "ticketCategoryId",
 					In:   "path",
@@ -4121,15 +4427,15 @@ func (s *Server) handleListAdminCategoriesRequest(args [0]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ListAdminCategoriesOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ListAdminCategoriesOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -4247,15 +4553,15 @@ func (s *Server) handleListAdminCitiesRequest(args [0]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ListAdminCitiesOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ListAdminCitiesOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -4373,15 +4679,15 @@ func (s *Server) handleListAdminOrganizerApplicationsRequest(args [0]string, arg
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ListAdminOrganizerApplicationsOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ListAdminOrganizerApplicationsOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -4518,15 +4824,15 @@ func (s *Server) handleListAdminOrganizersRequest(args [0]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, ListAdminOrganizersOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, ListAdminOrganizersOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -4634,6 +4940,132 @@ func (s *Server) handleListAdminOrganizersRequest(args [0]string, argsEscaped bo
 	}
 
 	if err := encodeListAdminOrganizersResponse(response, w); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleListAdminStaffRequest handles listAdminStaff operation.
+//
+// List platform staff.
+//
+// GET /admin/staff
+func (s *Server) handleListAdminStaffRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	ctx := r.Context()
+
+	var (
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: ListAdminStaffOperation,
+			ID:   "listAdminStaff",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityAdminAuth(ctx, ListAdminStaffOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "AdminAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+					defer recordError("Security:AdminAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+
+	var rawBody []byte
+
+	var response ListAdminStaffRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    ListAdminStaffOperation,
+			OperationSummary: "List platform staff",
+			OperationID:      "listAdminStaff",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params:           middleware.Parameters{},
+			Raw:              r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = ListAdminStaffRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.ListAdminStaff(ctx)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.ListAdminStaff(ctx)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeListAdminStaffResponse(response, w); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -5081,8 +5513,8 @@ func (s *Server) handleListMyTicketsRequest(args [0]string, argsEscaped bool, w 
 //
 // List events.
 //
-// GET /org/events
-func (s *Server) handleListOrgEventsRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /org/organizers/{organizerId}/events
+func (s *Server) handleListOrgEventsRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -5171,6 +5603,10 @@ func (s *Server) handleListOrgEventsRequest(args [0]string, argsEscaped bool, w 
 					Name: "pageSize",
 					In:   "query",
 				}: params.PageSize,
+				{
+					Name: "organizerId",
+					In:   "path",
+				}: params.OrganizerId,
 			},
 			Raw: r,
 		}
@@ -5214,6 +5650,147 @@ func (s *Server) handleListOrgEventsRequest(args [0]string, argsEscaped bool, w 
 	}
 
 	if err := encodeListOrgEventsResponse(response, w); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleListOrgMembersRequest handles listOrgMembers operation.
+//
+// List members.
+//
+// GET /org/organizers/{organizerId}/members
+func (s *Server) handleListOrgMembersRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	ctx := r.Context()
+
+	var (
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: ListOrgMembersOperation,
+			ID:   "listOrgMembers",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, ListOrgMembersOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeListOrgMembersParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response ListOrgMembersRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    ListOrgMembersOperation,
+			OperationSummary: "List members",
+			OperationID:      "listOrgMembers",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "organizerId",
+					In:   "path",
+				}: params.OrganizerId,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = ListOrgMembersParams
+			Response = ListOrgMembersRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackListOrgMembersParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.ListOrgMembers(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.ListOrgMembers(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeListOrgMembersResponse(response, w); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)
@@ -6649,8 +7226,8 @@ func (s *Server) handleListPublicUpcomingEventsRequest(args [0]string, argsEscap
 //
 // Postpone an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/postpone
-func (s *Server) handlePostponeOrgOccurrenceRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/occurrences/{occurrenceId}/postpone
+func (s *Server) handlePostponeOrgOccurrenceRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -6731,10 +7308,6 @@ func (s *Server) handlePostponeOrgOccurrenceRequest(args [2]string, argsEscaped 
 			Body:             nil,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
-				{
-					Name: "eventId",
-					In:   "path",
-				}: params.EventId,
 				{
 					Name: "occurrenceId",
 					In:   "path",
@@ -6952,15 +7525,15 @@ func (s *Server) handleRejectAdminOrganizerApplicationRequest(args [1]string, ar
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, RejectAdminOrganizerApplicationOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, RejectAdminOrganizerApplicationOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -7072,6 +7645,151 @@ func (s *Server) handleRejectAdminOrganizerApplicationRequest(args [1]string, ar
 	}
 }
 
+// handleRemoveOrgMemberRequest handles removeOrgMember operation.
+//
+// Removing the last owner is refused: an organizer without an owner has nobody who can manage it.
+//
+// DELETE /org/organizers/{organizerId}/members/{accountId}
+func (s *Server) handleRemoveOrgMemberRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	ctx := r.Context()
+
+	var (
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: RemoveOrgMemberOperation,
+			ID:   "removeOrgMember",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, RemoveOrgMemberOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeRemoveOrgMemberParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+
+	var response RemoveOrgMemberRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    RemoveOrgMemberOperation,
+			OperationSummary: "Remove a member",
+			OperationID:      "removeOrgMember",
+			Body:             nil,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "organizerId",
+					In:   "path",
+				}: params.OrganizerId,
+				{
+					Name: "accountId",
+					In:   "path",
+				}: params.AccountId,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = RemoveOrgMemberParams
+			Response = RemoveOrgMemberRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackRemoveOrgMemberParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.RemoveOrgMember(ctx, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.RemoveOrgMember(ctx, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeRemoveOrgMemberResponse(response, w); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleRequestChangesAdminOrganizerApplicationRequest handles requestChangesAdminOrganizerApplication operation.
 //
 // Request changes on an organizer application.
@@ -7093,15 +7811,15 @@ func (s *Server) handleRequestChangesAdminOrganizerApplicationRequest(args [1]st
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, RequestChangesAdminOrganizerApplicationOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, RequestChangesAdminOrganizerApplicationOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -7217,8 +7935,8 @@ func (s *Server) handleRequestChangesAdminOrganizerApplicationRequest(args [1]st
 //
 // Reschedule an occurrence.
 //
-// POST /org/events/{eventId}/occurrences/{occurrenceId}/reschedule
-func (s *Server) handleRescheduleOrgOccurrenceRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/occurrences/{occurrenceId}/reschedule
+func (s *Server) handleRescheduleOrgOccurrenceRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -7299,10 +8017,6 @@ func (s *Server) handleRescheduleOrgOccurrenceRequest(args [2]string, argsEscape
 			Body:             nil,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
-				{
-					Name: "eventId",
-					In:   "path",
-				}: params.EventId,
 				{
 					Name: "occurrenceId",
 					In:   "path",
@@ -7503,8 +8217,8 @@ func (s *Server) handleResubmitMyOrganizerApplicationRequest(args [1]string, arg
 //
 // Start a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/start
-func (s *Server) handleStartOrgSalePhaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/sale-phases/{salePhaseId}/start
+func (s *Server) handleStartOrgSalePhaseRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -7586,10 +8300,6 @@ func (s *Server) handleStartOrgSalePhaseRequest(args [2]string, argsEscaped bool
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
-				{
 					Name: "salePhaseId",
 					In:   "path",
 				}: params.SalePhaseId,
@@ -7665,15 +8375,15 @@ func (s *Server) handleSuspendAdminOrganizerRequest(args [1]string, argsEscaped 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, SuspendAdminOrganizerOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, SuspendAdminOrganizerOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -7789,8 +8499,8 @@ func (s *Server) handleSuspendAdminOrganizerRequest(args [1]string, argsEscaped 
 //
 // Suspend a sale phase.
 //
-// POST /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}/suspend
-func (s *Server) handleSuspendOrgSalePhaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// POST /org/sale-phases/{salePhaseId}/suspend
+func (s *Server) handleSuspendOrgSalePhaseRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -7872,10 +8582,6 @@ func (s *Server) handleSuspendOrgSalePhaseRequest(args [2]string, argsEscaped bo
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
-				{
 					Name: "salePhaseId",
 					In:   "path",
 				}: params.SalePhaseId,
@@ -7932,9 +8638,9 @@ func (s *Server) handleSuspendOrgSalePhaseRequest(args [2]string, argsEscaped bo
 
 // handleUpdateAdminCategoryRequest handles updateAdminCategory operation.
 //
-// Update a category.
+// Replace a category.
 //
-// PATCH /admin/categories/{categoryId}
+// PUT /admin/categories/{categoryId}
 func (s *Server) handleUpdateAdminCategoryRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
@@ -7951,15 +8657,15 @@ func (s *Server) handleUpdateAdminCategoryRequest(args [1]string, argsEscaped bo
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, UpdateAdminCategoryOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, UpdateAdminCategoryOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -8005,15 +8711,30 @@ func (s *Server) handleUpdateAdminCategoryRequest(args [1]string, argsEscaped bo
 	}
 
 	var rawBody []byte
+	request, rawBody, close, err := s.decodeUpdateAdminCategoryRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
 
 	var response UpdateAdminCategoryRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
 			OperationName:    UpdateAdminCategoryOperation,
-			OperationSummary: "Update a category",
+			OperationSummary: "Replace a category",
 			OperationID:      "updateAdminCategory",
-			Body:             nil,
+			Body:             request,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
@@ -8025,7 +8746,7 @@ func (s *Server) handleUpdateAdminCategoryRequest(args [1]string, argsEscaped bo
 		}
 
 		type (
-			Request  = struct{}
+			Request  = *UpdateCategoryRequest
 			Params   = UpdateAdminCategoryParams
 			Response = UpdateAdminCategoryRes
 		)
@@ -8038,12 +8759,12 @@ func (s *Server) handleUpdateAdminCategoryRequest(args [1]string, argsEscaped bo
 			mreq,
 			unpackUpdateAdminCategoryParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.UpdateAdminCategory(ctx, params)
+				response, err = s.h.UpdateAdminCategory(ctx, request, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.UpdateAdminCategory(ctx, params)
+		response, err = s.h.UpdateAdminCategory(ctx, request, params)
 	}
 	if err != nil {
 		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
@@ -8092,15 +8813,15 @@ func (s *Server) handleUpdateAdminCityRequest(args [1]string, argsEscaped bool, 
 		type bitset = [1]uint8
 		var satisfied bitset
 		{
-			sctx, ok, err := s.securityBearerAuth(ctx, UpdateAdminCityOperation, r)
+			sctx, ok, err := s.securityAdminAuth(ctx, UpdateAdminCityOperation, r)
 			if err != nil {
 				err = &ogenerrors.SecurityError{
 					OperationContext: opErrContext,
-					Security:         "BearerAuth",
+					Security:         "AdminAuth",
 					Err:              err,
 				}
 				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
-					defer recordError("Security:BearerAuth", err)
+					defer recordError("Security:AdminAuth", err)
 				}
 				return
 			}
@@ -8494,12 +9215,172 @@ func (s *Server) handleUpdateOrgEventRequest(args [1]string, argsEscaped bool, w
 	}
 }
 
+// handleUpdateOrgMemberRequest handles updateOrgMember operation.
+//
+// Change a member's role.
+//
+// PATCH /org/organizers/{organizerId}/members/{accountId}
+func (s *Server) handleUpdateOrgMemberRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	statusWriter := &codeRecorder{ResponseWriter: w}
+	w = statusWriter
+	ctx := r.Context()
+
+	var (
+		err          error
+		opErrContext = ogenerrors.OperationContext{
+			Name: UpdateOrgMemberOperation,
+			ID:   "updateOrgMember",
+		}
+	)
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			sctx, ok, err := s.securityBearerAuth(ctx, UpdateOrgMemberOperation, r)
+			if err != nil {
+				err = &ogenerrors.SecurityError{
+					OperationContext: opErrContext,
+					Security:         "BearerAuth",
+					Err:              err,
+				}
+				if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+					defer recordError("Security:BearerAuth", err)
+				}
+				return
+			}
+			if ok {
+				satisfied[0] |= 1 << 0
+				ctx = sctx
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			err = &ogenerrors.SecurityError{
+				OperationContext: opErrContext,
+				Err:              ogenerrors.ErrSecurityRequirementIsNotSatisfied,
+			}
+			if encodeErr := encodeErrorResponse(s.h.NewError(ctx, err), w); encodeErr != nil {
+				defer recordError("Security", err)
+			}
+			return
+		}
+	}
+	params, err := decodeUpdateOrgMemberParams(args, argsEscaped, r)
+	if err != nil {
+		err = &ogenerrors.DecodeParamsError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeParams", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	var rawBody []byte
+	request, rawBody, close, err := s.decodeUpdateOrgMemberRequest(r)
+	if err != nil {
+		err = &ogenerrors.DecodeRequestError{
+			OperationContext: opErrContext,
+			Err:              err,
+		}
+		defer recordError("DecodeRequest", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+	defer func() {
+		if err := close(); err != nil {
+			recordError("CloseRequest", err)
+		}
+	}()
+
+	var response UpdateOrgMemberRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    UpdateOrgMemberOperation,
+			OperationSummary: "Change a member's role",
+			OperationID:      "updateOrgMember",
+			Body:             request,
+			RawBody:          rawBody,
+			Params: middleware.Parameters{
+				{
+					Name: "organizerId",
+					In:   "path",
+				}: params.OrganizerId,
+				{
+					Name: "accountId",
+					In:   "path",
+				}: params.AccountId,
+			},
+			Raw: r,
+		}
+
+		type (
+			Request  = *UpdateOrganizerMemberRequest
+			Params   = UpdateOrgMemberParams
+			Response = UpdateOrgMemberRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			unpackUpdateOrgMemberParams,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.UpdateOrgMember(ctx, request, params)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.UpdateOrgMember(ctx, request, params)
+	}
+	if err != nil {
+		if errRes, ok := errors.Into[*DefaultStatusCode](err); ok {
+			if err := encodeErrorResponse(errRes, w); err != nil {
+				defer recordError("Internal", err)
+			}
+			return
+		}
+		if errors.Is(err, ht.ErrNotImplemented) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+			return
+		}
+		if err := encodeErrorResponse(s.h.NewError(ctx, err), w); err != nil {
+			defer recordError("Internal", err)
+		}
+		return
+	}
+
+	if err := encodeUpdateOrgMemberResponse(response, w); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
 // handleUpdateOrgOccurrenceRequest handles updateOrgOccurrence operation.
 //
 // Update an occurrence.
 //
-// PATCH /org/events/{eventId}/occurrences/{occurrenceId}
-func (s *Server) handleUpdateOrgOccurrenceRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// PATCH /org/occurrences/{occurrenceId}
+func (s *Server) handleUpdateOrgOccurrenceRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -8581,10 +9462,6 @@ func (s *Server) handleUpdateOrgOccurrenceRequest(args [2]string, argsEscaped bo
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "eventId",
-					In:   "path",
-				}: params.EventId,
-				{
 					Name: "occurrenceId",
 					In:   "path",
 				}: params.OccurrenceId,
@@ -8643,8 +9520,8 @@ func (s *Server) handleUpdateOrgOccurrenceRequest(args [2]string, argsEscaped bo
 //
 // Update a sale phase.
 //
-// PATCH /org/occurrences/{occurrenceId}/sale-phases/{salePhaseId}
-func (s *Server) handleUpdateOrgSalePhaseRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// PATCH /org/sale-phases/{salePhaseId}
+func (s *Server) handleUpdateOrgSalePhaseRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -8726,10 +9603,6 @@ func (s *Server) handleUpdateOrgSalePhaseRequest(args [2]string, argsEscaped boo
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
 				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
-				{
 					Name: "salePhaseId",
 					In:   "path",
 				}: params.SalePhaseId,
@@ -8788,8 +9661,8 @@ func (s *Server) handleUpdateOrgSalePhaseRequest(args [2]string, argsEscaped boo
 //
 // Update a ticket category.
 //
-// PATCH /org/occurrences/{occurrenceId}/ticket-categories/{ticketCategoryId}
-func (s *Server) handleUpdateOrgTicketCategoryRequest(args [2]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// PATCH /org/ticket-categories/{ticketCategoryId}
+func (s *Server) handleUpdateOrgTicketCategoryRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	statusWriter := &codeRecorder{ResponseWriter: w}
 	w = statusWriter
 	ctx := r.Context()
@@ -8870,10 +9743,6 @@ func (s *Server) handleUpdateOrgTicketCategoryRequest(args [2]string, argsEscape
 			Body:             nil,
 			RawBody:          rawBody,
 			Params: middleware.Parameters{
-				{
-					Name: "occurrenceId",
-					In:   "path",
-				}: params.OccurrenceId,
 				{
 					Name: "ticketCategoryId",
 					In:   "path",

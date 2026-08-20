@@ -37,6 +37,14 @@ watch: ## Run application in watch mode
 sqlc-generate: ## Generate code from SQL queries
 	@sqlc generate
 
+.PHONY: sql-lint
+sql-lint: ## Lint and check formatting of SQL files
+	@sqlfluff lint db
+
+.PHONY: sql-format
+sql-format: ## Format SQL files in place
+	@sqlfluff format db
+
 ##@ Migrations
 .PHONY: migrate-new
 migrate-new: ## Create an empty migration file

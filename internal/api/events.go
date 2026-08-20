@@ -7,7 +7,7 @@ import (
 )
 
 // eventsHandler serves the Events operations, across every audience that exposes them.
-type eventsHandler struct{ deps }
+type eventsHandler struct{}
 
 // Compile-time check for eventsHandler.
 var _ oas.EventsHandler = (*eventsHandler)(nil)
@@ -18,7 +18,7 @@ func (h *eventsHandler) CloseOrgEvent(ctx context.Context, params oas.CloseOrgEv
 }
 
 // CreateOrgEvent implements [oas.EventsHandler].
-func (h *eventsHandler) CreateOrgEvent(ctx context.Context) (oas.CreateOrgEventRes, error) {
+func (h *eventsHandler) CreateOrgEvent(ctx context.Context, params oas.CreateOrgEventParams) (oas.CreateOrgEventRes, error) {
 	panic("unimplemented")
 }
 

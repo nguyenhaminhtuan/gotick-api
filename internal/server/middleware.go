@@ -85,7 +85,7 @@ func (s *server) recoverer(next http.Handler) http.Handler {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			_ = json.NewEncoder(w).Encode(oas.Error{
-				Error:   "InternalServerError",
+				Error:   "INTERNAL",
 				Message: "An unexpected error occurred. Please try again later.",
 			})
 		}()

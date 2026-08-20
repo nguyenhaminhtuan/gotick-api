@@ -13,6 +13,10 @@ type ActivateAdminOrganizerRes interface {
 	activateAdminOrganizerRes()
 }
 
+type AddOrgMemberRes interface {
+	addOrgMemberRes()
+}
+
 type ApproveAdminOrganizerApplicationRes interface {
 	approveAdminOrganizerApplicationRes()
 }
@@ -43,6 +47,10 @@ type CreateMyOrderRes interface {
 
 type CreateMyOrganizerApplicationRes interface {
 	createMyOrganizerApplicationRes()
+}
+
+type CreateMyProfileRes interface {
+	createMyProfileRes()
 }
 
 type CreateOrgEventRes interface {
@@ -137,6 +145,10 @@ type ListAdminOrganizersRes interface {
 	listAdminOrganizersRes()
 }
 
+type ListAdminStaffRes interface {
+	listAdminStaffRes()
+}
+
 type ListMyOrdersRes interface {
 	listMyOrdersRes()
 }
@@ -151,6 +163,10 @@ type ListMyTicketsRes interface {
 
 type ListOrgEventsRes interface {
 	listOrgEventsRes()
+}
+
+type ListOrgMembersRes interface {
+	listOrgMembersRes()
 }
 
 type ListOrgOccurrencesRes interface {
@@ -217,6 +233,10 @@ type RejectAdminOrganizerApplicationRes interface {
 	rejectAdminOrganizerApplicationRes()
 }
 
+type RemoveOrgMemberRes interface {
+	removeOrgMemberRes()
+}
+
 type RequestChangesAdminOrganizerApplicationRes interface {
 	requestChangesAdminOrganizerApplicationRes()
 }
@@ -255,6 +275,10 @@ type UpdateMyOrganizerApplicationRes interface {
 
 type UpdateOrgEventRes interface {
 	updateOrgEventRes()
+}
+
+type UpdateOrgMemberRes interface {
+	updateOrgMemberRes()
 }
 
 type UpdateOrgOccurrenceRes interface {

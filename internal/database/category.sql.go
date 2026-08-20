@@ -9,6 +9,91 @@ import (
 	"context"
 )
 
+const activateCategory = `-- name: ActivateCategory :one
+UPDATE categories
+SET
+    status = 'active',
+    updated_at = now()
+WHERE id = $1 AND status = 'inactive'
+RETURNING id, name, slug, icon, display_order, status, created_at, updated_at
+`
+
+func (q *Queries) ActivateCategory(ctx context.Context, id int64) (Category, error) {
+	row := q.db.QueryRow(ctx, activateCategory, id)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.Icon,
+		&i.DisplayOrder,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const deactivateCategory = `-- name: DeactivateCategory :one
+UPDATE categories
+SET
+    status = 'inactive',
+    updated_at = now()
+WHERE id = $1 AND status = 'active'
+RETURNING id, name, slug, icon, display_order, status, created_at, updated_at
+`
+
+func (q *Queries) DeactivateCategory(ctx context.Context, id int64) (Category, error) {
+	row := q.db.QueryRow(ctx, deactivateCategory, id)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.Icon,
+		&i.DisplayOrder,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAllCategories = `-- name: GetAllCategories :many
+SELECT id, name, slug, icon, display_order, status, created_at, updated_at
+FROM categories
+ORDER BY display_order
+`
+
+func (q *Queries) GetAllCategories(ctx context.Context) ([]Category, error) {
+	rows, err := q.db.Query(ctx, getAllCategories)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Category
+	for rows.Next() {
+		var i Category
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.Icon,
+			&i.DisplayOrder,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCategories = `-- name: GetCategories :many
 SELECT id, name, slug, icon, display_order, status, created_at, updated_at
 FROM categories
@@ -45,9 +130,32 @@ func (q *Queries) GetCategories(ctx context.Context) ([]Category, error) {
 	return items, nil
 }
 
-const insertCategory = `-- name: InsertCategory :execrows
+const getCategory = `-- name: GetCategory :one
+SELECT id, name, slug, icon, display_order, status, created_at, updated_at
+FROM categories
+WHERE id = $1
+`
+
+func (q *Queries) GetCategory(ctx context.Context, id int64) (Category, error) {
+	row := q.db.QueryRow(ctx, getCategory, id)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.Icon,
+		&i.DisplayOrder,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertCategory = `-- name: InsertCategory :one
 INSERT INTO categories (name, slug, icon, display_order)
 VALUES ($1, $2, $3, $4)
+RETURNING id, name, slug, icon, display_order, status, created_at, updated_at
 `
 
 type InsertCategoryParams struct {
@@ -57,15 +165,65 @@ type InsertCategoryParams struct {
 	DisplayOrder int64
 }
 
-func (q *Queries) InsertCategory(ctx context.Context, arg InsertCategoryParams) (int64, error) {
-	result, err := q.db.Exec(ctx, insertCategory,
+func (q *Queries) InsertCategory(ctx context.Context, arg InsertCategoryParams) (Category, error) {
+	row := q.db.QueryRow(ctx, insertCategory,
 		arg.Name,
 		arg.Slug,
 		arg.Icon,
 		arg.DisplayOrder,
 	)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.Icon,
+		&i.DisplayOrder,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateCategory = `-- name: UpdateCategory :one
+UPDATE categories
+SET
+    name = $1,
+    slug = $2,
+    icon = $3,
+    display_order = $4,
+    updated_at = now()
+WHERE id = $5
+RETURNING id, name, slug, icon, display_order, status, created_at, updated_at
+`
+
+type UpdateCategoryParams struct {
+	Name         string
+	Slug         string
+	Icon         *string
+	DisplayOrder int64
+	ID           int64
+}
+
+func (q *Queries) UpdateCategory(ctx context.Context, arg UpdateCategoryParams) (Category, error) {
+	row := q.db.QueryRow(ctx, updateCategory,
+		arg.Name,
+		arg.Slug,
+		arg.Icon,
+		arg.DisplayOrder,
+		arg.ID,
+	)
+	var i Category
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Slug,
+		&i.Icon,
+		&i.DisplayOrder,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

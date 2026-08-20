@@ -5,11 +5,6 @@ get:
   x-ogen-operation-group: TicketCategories
   summary: Get a ticket category
   parameters:
-    - name: occurrenceId
-      in: path
-      required: true
-      schema:
-        $ref: ../components/schemas/UUID.yaml
     - name: ticketCategoryId
       in: path
       required: true
@@ -37,11 +32,6 @@ patch:
   x-ogen-operation-group: TicketCategories
   summary: Update a ticket category
   parameters:
-    - name: occurrenceId
-      in: path
-      required: true
-      schema:
-        $ref: ../components/schemas/UUID.yaml
     - name: ticketCategoryId
       in: path
       required: true

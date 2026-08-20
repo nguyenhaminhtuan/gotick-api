@@ -144,3 +144,54 @@ module "asset_cleaner_schedule" {
   time_zone   = local.scheduler_timezone
   paused      = true
 }
+
+module "grant_staff" {
+  source = "../modules/cloud-run-job"
+
+  project_id = var.project_id
+  name       = "grant-staff"
+  region     = var.region
+  # The API's own identity: it already holds firebaseauth.admin and reads the
+  # same database password, and this job does nothing the API cannot do.
+  service_account = local.sa_email["api"]
+
+  deletion_protection = var.deletion_protection
+
+  parallelism = 1
+  task_count  = 1
+  timeout     = "300s"
+
+  resource_limits = { cpu = "1", memory = "512Mi" }
+
+  # Runs from the API image, which carries this binary alongside the server.
+  # Arguments are passed per execution, so the job holds none.
+  command = ["/grant-staff"]
+
+  vpc_access = {
+    network    = module.network.id
+    subnetwork = module.network.subnets[local.subnet_run].id
+    # The database is private, the identity provider is not.
+    egress = "all-traffic"
+  }
+
+  env = {
+    DB_HOST     = module.database.private_ip_address
+    DB_PORT     = "5432"
+    DB_NAME     = module.database.database_name
+    DB_SCHEMA   = local.db_schema
+    DB_USER     = "app"
+    DB_SSL_MODE = "require"
+
+    DB_MIN_CONNS = "1"
+    DB_MAX_CONNS = "2"
+
+    ENV                      = "production"
+    LOG_FORMAT               = "json"
+    LOG_LEVEL                = "info"
+    LOG_ENABLE_CLOUD_LOGGING = "true"
+  }
+
+  secrets = {
+    DB_PASSWORD = { secret = module.db_app_password.secret_id }
+  }
+}

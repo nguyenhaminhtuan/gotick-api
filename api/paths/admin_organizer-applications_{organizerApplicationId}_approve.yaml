@@ -5,7 +5,7 @@ post:
   x-ogen-operation-group: OrganizerApplications
   summary: Approve an organizer application
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - name: organizerApplicationId
       in: path

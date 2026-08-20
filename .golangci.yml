@@ -6,6 +6,7 @@ linters:
   enable:
     - bodyclose
     - errorlint
+    - exhaustive
     - misspell
     - noctx
   exclusions:

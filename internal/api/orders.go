@@ -7,7 +7,7 @@ import (
 )
 
 // ordersHandler serves the Orders operations, across every audience that exposes them.
-type ordersHandler struct{ deps }
+type ordersHandler struct{}
 
 // Compile-time check for ordersHandler.
 var _ oas.OrdersHandler = (*ordersHandler)(nil)

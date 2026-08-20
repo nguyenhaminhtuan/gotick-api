@@ -4,28 +4,25 @@ import (
 	"log/slog"
 
 	"gotick/internal/auth"
-	"gotick/internal/database"
 	"gotick/internal/oas"
+	"gotick/internal/service"
 )
 
-type deps struct {
-	db       *database.DB
+type Handler struct {
 	logger   *slog.Logger
 	verifier auth.Verifier
-}
-
-type Handler struct {
-	deps
 
 	categoriesHandler
 	citiesHandler
 	eventsHandler
+	membersHandler
 	occurrencesHandler
 	ordersHandler
 	organizerApplicationsHandler
 	organizersHandler
 	profileHandler
 	salePhasesHandler
+	staffHandler
 	ticketCategoriesHandler
 	ticketsHandler
 }
@@ -33,25 +30,19 @@ type Handler struct {
 // Compile-time check for Handler.
 var _ oas.Handler = (*Handler)(nil)
 
-func NewHandler(db *database.DB, logger *slog.Logger, verifier auth.Verifier) *Handler {
-	d := deps{
-		db:       db,
+func NewHandler(
+	categories *service.Categories,
+	accounts *service.Accounts,
+	staff *service.Staff,
+	logger *slog.Logger,
+	verifier auth.Verifier,
+) *Handler {
+	return &Handler{
 		logger:   logger.With("component", "api"),
 		verifier: verifier,
-	}
 
-	return &Handler{
-		deps:                         d,
-		categoriesHandler:            categoriesHandler{deps: d},
-		citiesHandler:                citiesHandler{deps: d},
-		eventsHandler:                eventsHandler{deps: d},
-		occurrencesHandler:           occurrencesHandler{deps: d},
-		ordersHandler:                ordersHandler{deps: d},
-		organizerApplicationsHandler: organizerApplicationsHandler{deps: d},
-		organizersHandler:            organizersHandler{deps: d},
-		profileHandler:               profileHandler{deps: d},
-		salePhasesHandler:            salePhasesHandler{deps: d},
-		ticketCategoriesHandler:      ticketCategoriesHandler{deps: d},
-		ticketsHandler:               ticketsHandler{deps: d},
+		categoriesHandler: categoriesHandler{categories: categories},
+		profileHandler:    profileHandler{accounts: accounts},
+		staffHandler:      staffHandler{staff: staff},
 	}
 }

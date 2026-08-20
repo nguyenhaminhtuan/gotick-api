@@ -5,7 +5,7 @@ get:
   x-ogen-operation-group: Cities
   summary: List cities
   security:
-    - bearerAuth: []
+    - adminAuth: []
   responses:
     '200':
       description: Successful response.
@@ -26,7 +26,7 @@ post:
   x-ogen-operation-group: Cities
   summary: Create a city
   security:
-    - bearerAuth: []
+    - adminAuth: []
   responses:
     '201':
       description: Resource created.

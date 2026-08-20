@@ -5,7 +5,7 @@ post:
   x-ogen-operation-group: Cities
   summary: Deactivate a city
   security:
-    - bearerAuth: []
+    - adminAuth: []
   parameters:
     - name: cityCode
       in: path

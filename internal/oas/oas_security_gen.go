@@ -13,6 +13,8 @@ import (
 
 // SecurityHandler is handler for security parameters.
 type SecurityHandler interface {
+	// HandleAdminAuth handles adminAuth security.
+	HandleAdminAuth(ctx context.Context, operationName OperationName, t AdminAuth) (context.Context, error)
 	// HandleBearerAuth handles bearerAuth security.
 	HandleBearerAuth(ctx context.Context, operationName OperationName, t BearerAuth) (context.Context, error)
 }
@@ -32,63 +34,94 @@ func findAuthorization(h http.Header, prefix string) (string, bool) {
 	return "", false
 }
 
-// operationRolesBearerAuth is a private map storing roles per operation.
-var operationRolesBearerAuth = map[string][]string{
+// operationRolesAdminAuth is a private map storing roles per operation.
+var operationRolesAdminAuth = map[string][]string{
 	ActivateAdminCategoryOperation:                   []string{},
 	ActivateAdminCityOperation:                       []string{},
 	ActivateAdminOrganizerOperation:                  []string{},
 	ApproveAdminOrganizerApplicationOperation:        []string{},
-	CancelOrgOccurrenceOperation:                     []string{},
-	CancelOrgSalePhaseOperation:                      []string{},
-	CloseOrgEventOperation:                           []string{},
 	CreateAdminCategoryOperation:                     []string{},
 	CreateAdminCityOperation:                         []string{},
-	CreateMyOrderOperation:                           []string{},
-	CreateMyOrganizerApplicationOperation:            []string{},
-	CreateOrgEventOperation:                          []string{},
-	CreateOrgOccurrenceOperation:                     []string{},
-	CreateOrgSalePhaseOperation:                      []string{},
-	CreateOrgTicketCategoryOperation:                 []string{},
 	DeactivateAdminCategoryOperation:                 []string{},
 	DeactivateAdminCityOperation:                     []string{},
-	EndOrgSalePhaseOperation:                         []string{},
 	GetAdminCategoryOperation:                        []string{},
 	GetAdminCityOperation:                            []string{},
-	GetMyOrderOperation:                              []string{},
-	GetMyOrganizerApplicationOperation:               []string{},
-	GetMyProfileOperation:                            []string{},
-	GetMyTicketOperation:                             []string{},
-	GetOrgEventOperation:                             []string{},
-	GetOrgOccurrenceOperation:                        []string{},
-	GetOrgSalePhaseOperation:                         []string{},
-	GetOrgTicketCategoryOperation:                    []string{},
 	ListAdminCategoriesOperation:                     []string{},
 	ListAdminCitiesOperation:                         []string{},
 	ListAdminOrganizerApplicationsOperation:          []string{},
 	ListAdminOrganizersOperation:                     []string{},
-	ListMyOrdersOperation:                            []string{},
-	ListMyOrganizerApplicationsOperation:             []string{},
-	ListMyTicketsOperation:                           []string{},
-	ListOrgEventsOperation:                           []string{},
-	ListOrgOccurrencesOperation:                      []string{},
-	ListOrgSalePhasesOperation:                       []string{},
-	ListOrgTicketCategoriesOperation:                 []string{},
-	PostponeOrgOccurrenceOperation:                   []string{},
-	PublishOrgEventOperation:                         []string{},
+	ListAdminStaffOperation:                          []string{},
 	RejectAdminOrganizerApplicationOperation:         []string{},
 	RequestChangesAdminOrganizerApplicationOperation: []string{},
-	RescheduleOrgOccurrenceOperation:                 []string{},
-	ResubmitMyOrganizerApplicationOperation:          []string{},
-	StartOrgSalePhaseOperation:                       []string{},
 	SuspendAdminOrganizerOperation:                   []string{},
-	SuspendOrgSalePhaseOperation:                     []string{},
 	UpdateAdminCategoryOperation:                     []string{},
 	UpdateAdminCityOperation:                         []string{},
-	UpdateMyOrganizerApplicationOperation:            []string{},
-	UpdateOrgEventOperation:                          []string{},
-	UpdateOrgOccurrenceOperation:                     []string{},
-	UpdateOrgSalePhaseOperation:                      []string{},
-	UpdateOrgTicketCategoryOperation:                 []string{},
+}
+
+// GetRolesForAdminAuth returns the required roles for the given operation.
+//
+// This is useful for authorization scenarios where you need to know which roles
+// are required for an operation.
+//
+// Example:
+//
+//	requiredRoles := GetRolesForAdminAuth(AddPetOperation)
+//
+// Returns nil if the operation has no role requirements or if the operation is unknown.
+func GetRolesForAdminAuth(operation string) []string {
+	roles, ok := operationRolesAdminAuth[operation]
+	if !ok {
+		return nil
+	}
+	// Return a copy to prevent external modification
+	result := make([]string, len(roles))
+	copy(result, roles)
+	return result
+}
+
+// operationRolesBearerAuth is a private map storing roles per operation.
+var operationRolesBearerAuth = map[string][]string{
+	AddOrgMemberOperation:                   []string{},
+	CancelOrgOccurrenceOperation:            []string{},
+	CancelOrgSalePhaseOperation:             []string{},
+	CloseOrgEventOperation:                  []string{},
+	CreateMyOrderOperation:                  []string{},
+	CreateMyOrganizerApplicationOperation:   []string{},
+	CreateMyProfileOperation:                []string{},
+	CreateOrgEventOperation:                 []string{},
+	CreateOrgOccurrenceOperation:            []string{},
+	CreateOrgSalePhaseOperation:             []string{},
+	CreateOrgTicketCategoryOperation:        []string{},
+	EndOrgSalePhaseOperation:                []string{},
+	GetMyOrderOperation:                     []string{},
+	GetMyOrganizerApplicationOperation:      []string{},
+	GetMyProfileOperation:                   []string{},
+	GetMyTicketOperation:                    []string{},
+	GetOrgEventOperation:                    []string{},
+	GetOrgOccurrenceOperation:               []string{},
+	GetOrgSalePhaseOperation:                []string{},
+	GetOrgTicketCategoryOperation:           []string{},
+	ListMyOrdersOperation:                   []string{},
+	ListMyOrganizerApplicationsOperation:    []string{},
+	ListMyTicketsOperation:                  []string{},
+	ListOrgEventsOperation:                  []string{},
+	ListOrgMembersOperation:                 []string{},
+	ListOrgOccurrencesOperation:             []string{},
+	ListOrgSalePhasesOperation:              []string{},
+	ListOrgTicketCategoriesOperation:        []string{},
+	PostponeOrgOccurrenceOperation:          []string{},
+	PublishOrgEventOperation:                []string{},
+	RemoveOrgMemberOperation:                []string{},
+	RescheduleOrgOccurrenceOperation:        []string{},
+	ResubmitMyOrganizerApplicationOperation: []string{},
+	StartOrgSalePhaseOperation:              []string{},
+	SuspendOrgSalePhaseOperation:            []string{},
+	UpdateMyOrganizerApplicationOperation:   []string{},
+	UpdateOrgEventOperation:                 []string{},
+	UpdateOrgMemberOperation:                []string{},
+	UpdateOrgOccurrenceOperation:            []string{},
+	UpdateOrgSalePhaseOperation:             []string{},
+	UpdateOrgTicketCategoryOperation:        []string{},
 }
 
 // GetRolesForBearerAuth returns the required roles for the given operation.
@@ -112,6 +145,23 @@ func GetRolesForBearerAuth(operation string) []string {
 	return result
 }
 
+func (s *Server) securityAdminAuth(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
+	var t AdminAuth
+	token, ok := findAuthorization(req.Header, "Bearer")
+	if !ok {
+		return ctx, false, nil
+	}
+	t.Token = token
+	t.Roles = operationRolesAdminAuth[operationName]
+	rctx, err := s.sec.HandleAdminAuth(ctx, operationName, t)
+	if errors.Is(err, ogenerrors.ErrSkipServerSecurity) {
+		return nil, false, nil
+	} else if err != nil {
+		return nil, false, err
+	}
+	return rctx, true, err
+}
+
 func (s *Server) securityBearerAuth(ctx context.Context, operationName OperationName, req *http.Request) (context.Context, bool, error) {
 	var t BearerAuth
 	token, ok := findAuthorization(req.Header, "Bearer")
@@ -131,10 +181,20 @@ func (s *Server) securityBearerAuth(ctx context.Context, operationName Operation
 
 // SecuritySource is provider of security values (tokens, passwords, etc.).
 type SecuritySource interface {
+	// AdminAuth provides adminAuth security value.
+	AdminAuth(ctx context.Context, operationName OperationName) (AdminAuth, error)
 	// BearerAuth provides bearerAuth security value.
 	BearerAuth(ctx context.Context, operationName OperationName) (BearerAuth, error)
 }
 
+func (s *Client) securityAdminAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
+	t, err := s.sec.AdminAuth(ctx, operationName)
+	if err != nil {
+		return errors.Wrap(err, "security source \"AdminAuth\"")
+	}
+	req.Header.Set("Authorization", "Bearer "+t.Token)
+	return nil
+}
 func (s *Client) securityBearerAuth(ctx context.Context, operationName OperationName, req *http.Request) error {
 	t, err := s.sec.BearerAuth(ctx, operationName)
 	if err != nil {

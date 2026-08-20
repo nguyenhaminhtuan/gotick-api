@@ -1,0 +1,10 @@
+type: object
+properties:
+  email:
+    type: string
+    format: email
+  role:
+    $ref: ./OrganizerMemberRole.yaml
+required:
+  - email
+  - role

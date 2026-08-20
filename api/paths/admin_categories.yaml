@@ -5,7 +5,7 @@ get:
   x-ogen-operation-group: Categories
   summary: List categories
   security:
-    - bearerAuth: []
+    - adminAuth: []
   responses:
     '200':
       description: Successful response.
@@ -26,7 +26,13 @@ post:
   x-ogen-operation-group: Categories
   summary: Create a category
   security:
-    - bearerAuth: []
+    - adminAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/CreateCategoryRequest.yaml
   responses:
     '201':
       description: Resource created.
@@ -40,5 +46,7 @@ post:
       $ref: ../components/responses/Unauthorized.yaml
     '403':
       $ref: ../components/responses/Forbidden.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml

@@ -1,3 +1,9 @@
+parameters:
+  - name: organizerId
+    in: path
+    required: true
+    schema:
+      $ref: ../components/schemas/UUID.yaml
 get:
   tags:
     - Organizer Events
@@ -20,6 +26,8 @@ get:
       $ref: ../components/responses/Unauthorized.yaml
     '403':
       $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
     default:
       $ref: ../components/responses/Default.yaml
 post:
@@ -41,5 +49,7 @@ post:
       $ref: ../components/responses/Unauthorized.yaml
     '403':
       $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
     default:
       $ref: ../components/responses/Default.yaml

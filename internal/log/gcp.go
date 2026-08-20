@@ -29,6 +29,8 @@ func cloudLoggingSeverity(l zerolog.Level) string {
 		return "CRITICAL"
 	case zerolog.PanicLevel:
 		return "ALERT"
+	case zerolog.NoLevel, zerolog.Disabled:
+		return "DEFAULT"
 	default:
 		return "DEFAULT"
 	}

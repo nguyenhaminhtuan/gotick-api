@@ -15,5 +15,38 @@ get:
             $ref: ../components/schemas/MyProfile.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - My Profile
+  operationId: createMyProfile
+  x-ogen-operation-group: Profile
+  summary: Create my profile
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/CreateMyProfileRequest.yaml
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyProfile.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml

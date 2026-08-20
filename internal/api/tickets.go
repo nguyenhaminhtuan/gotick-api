@@ -7,7 +7,7 @@ import (
 )
 
 // ticketsHandler serves the Tickets operations, across every audience that exposes them.
-type ticketsHandler struct{ deps }
+type ticketsHandler struct{}
 
 // Compile-time check for ticketsHandler.
 var _ oas.TicketsHandler = (*ticketsHandler)(nil)

@@ -5,11 +5,6 @@ post:
   x-ogen-operation-group: Occurrences
   summary: Reschedule an occurrence
   parameters:
-    - name: eventId
-      in: path
-      required: true
-      schema:
-        $ref: ../components/schemas/UUID.yaml
     - name: occurrenceId
       in: path
       required: true
