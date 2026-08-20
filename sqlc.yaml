@@ -40,3 +40,4 @@ sql:
               pointer: true
         rename:
           uuid: "UUID"
+          firebase_uid: "FirebaseUID"

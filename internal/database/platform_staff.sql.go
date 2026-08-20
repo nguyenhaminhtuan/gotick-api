@@ -49,7 +49,7 @@ type ListPlatformStaffRow struct {
 	UpdatedAt   time.Time
 	Role        string
 	GrantedBy   *uuid.UUID
-	FirebaseUid string
+	FirebaseUID string
 	FullName    string
 	Email       string
 	Avatar      string
@@ -70,7 +70,7 @@ func (q *Queries) ListPlatformStaff(ctx context.Context) ([]ListPlatformStaffRow
 			&i.UpdatedAt,
 			&i.Role,
 			&i.GrantedBy,
-			&i.FirebaseUid,
+			&i.FirebaseUID,
 			&i.FullName,
 			&i.Email,
 			&i.Avatar,

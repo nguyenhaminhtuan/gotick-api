@@ -68,7 +68,7 @@ func (s *Accounts) SetupProfile(ctx context.Context, principal auth.Principal, i
 
 	account, err := s.store.InsertAccount(ctx, database.InsertAccountParams{
 		FullName:    input.FullName,
-		FirebaseUid: principal.Subject,
+		FirebaseUID: principal.Subject,
 		Email:       principal.Email,
 		Avatar:      principal.Claim("picture"),
 		Phone:       phone,

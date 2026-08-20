@@ -19,7 +19,7 @@ type Account struct {
 	SuspendedAt    *time.Time
 	CreatedAt      time.Time
 	UpdatedAt      time.Time
-	FirebaseUid    string
+	FirebaseUID    string
 	Phone          string
 	PhoneChangedAt time.Time
 }
