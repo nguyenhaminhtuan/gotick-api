@@ -29,7 +29,7 @@ func (q *Queries) GetAccountByFirebaseUID(ctx context.Context, firebaseUid strin
 		&i.SuspendedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.FirebaseUid,
+		&i.FirebaseUID,
 		&i.Phone,
 		&i.PhoneChangedAt,
 	)
@@ -54,7 +54,7 @@ func (q *Queries) GetAccountByID(ctx context.Context, id uuid.UUID) (Account, er
 		&i.SuspendedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.FirebaseUid,
+		&i.FirebaseUID,
 		&i.Phone,
 		&i.PhoneChangedAt,
 	)
@@ -70,7 +70,7 @@ RETURNING id, full_name, email, avatar, status, suspended_at, created_at, update
 `
 
 type InsertAccountParams struct {
-	FirebaseUid string
+	FirebaseUID string
 	FullName    string
 	Email       string
 	Avatar      string
@@ -82,7 +82,7 @@ type InsertAccountParams struct {
 // hence a write that changes nothing.
 func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) (Account, error) {
 	row := q.db.QueryRow(ctx, insertAccount,
-		arg.FirebaseUid,
+		arg.FirebaseUID,
 		arg.FullName,
 		arg.Email,
 		arg.Avatar,
@@ -98,7 +98,7 @@ func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) (A
 		&i.SuspendedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
-		&i.FirebaseUid,
+		&i.FirebaseUID,
 		&i.Phone,
 		&i.PhoneChangedAt,
 	)

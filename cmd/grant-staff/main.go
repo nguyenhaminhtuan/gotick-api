@@ -163,7 +163,7 @@ func loadOrCreateAccount(
 	}
 
 	account, err = db.InsertAccount(ctx, database.InsertAccountParams{
-		FirebaseUid: opts.subject,
+		FirebaseUID: opts.subject,
 		FullName:    fullName,
 		Email:       user.Email,
 		Avatar:      user.Avatar,
