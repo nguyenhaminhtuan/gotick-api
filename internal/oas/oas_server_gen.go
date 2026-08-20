@@ -406,9 +406,7 @@ type OrganizersHandler interface {
 type ProfileHandler interface {
 	// CreateMyProfile implements createMyProfile operation.
 	//
-	// Completes account setup for the signed-in identity. Email and phone number are taken from the
-	// verified token, never from the body. Calling it again for an identity that already has a profile
-	// returns the existing one.
+	// Create my profile.
 	//
 	// POST /me/profile
 	CreateMyProfile(ctx context.Context, req *CreateMyProfileRequest) (CreateMyProfileRes, error)

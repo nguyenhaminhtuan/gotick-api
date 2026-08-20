@@ -417,9 +417,7 @@ type OrganizersInvoker interface {
 type ProfileInvoker interface {
 	// CreateMyProfile invokes createMyProfile operation.
 	//
-	// Completes account setup for the signed-in identity. Email and phone number are taken from the
-	// verified token, never from the body. Calling it again for an identity that already has a profile
-	// returns the existing one.
+	// Create my profile.
 	//
 	// POST /me/profile
 	CreateMyProfile(ctx context.Context, request *CreateMyProfileRequest) (CreateMyProfileRes, error)
@@ -1692,9 +1690,7 @@ func (c *Client) sendCreateMyOrganizerApplication(ctx context.Context) (res Crea
 
 // CreateMyProfile invokes createMyProfile operation.
 //
-// Completes account setup for the signed-in identity. Email and phone number are taken from the
-// verified token, never from the body. Calling it again for an identity that already has a profile
-// returns the existing one.
+// Create my profile.
 //
 // POST /me/profile
 func (c *Client) CreateMyProfile(ctx context.Context, request *CreateMyProfileRequest) (CreateMyProfileRes, error) {

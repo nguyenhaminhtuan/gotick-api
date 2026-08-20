@@ -1693,9 +1693,7 @@ func (s *Server) handleCreateMyOrganizerApplicationRequest(args [0]string, argsE
 
 // handleCreateMyProfileRequest handles createMyProfile operation.
 //
-// Completes account setup for the signed-in identity. Email and phone number are taken from the
-// verified token, never from the body. Calling it again for an identity that already has a profile
-// returns the existing one.
+// Create my profile.
 //
 // POST /me/profile
 func (s *Server) handleCreateMyProfileRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
