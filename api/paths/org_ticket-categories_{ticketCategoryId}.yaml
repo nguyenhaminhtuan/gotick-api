@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
     - Organizer Ticket Categories
   operationId: getOrgTicketCategory
+  x-authz:
+    scope: tenant
+    permission: ticket-categories:read
   x-ogen-operation-group: TicketCategories
   summary: Get a ticket category
   parameters:
@@ -29,6 +34,9 @@ patch:
   tags:
     - Organizer Ticket Categories
   operationId: updateOrgTicketCategory
+  x-authz:
+    scope: tenant
+    permission: ticket-categories:update
   x-ogen-operation-group: TicketCategories
   summary: Update a ticket category
   parameters:

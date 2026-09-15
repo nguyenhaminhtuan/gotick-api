@@ -1,33 +1,32 @@
 parameters:
-  - name: organizerId
-    in: path
-    required: true
-    schema:
-      $ref: ../components/schemas/UUID.yaml
-  - name: accountId
+  - $ref: ../components/parameters/TenantID.yaml
+  - name: roleId
     in: path
     required: true
     schema:
       $ref: ../components/schemas/UUID.yaml
 patch:
   tags:
-    - Organizer Members
-  operationId: updateOrgMember
-  x-ogen-operation-group: Members
-  summary: Change a member's role
+    - Organizer Roles
+  operationId: updateOrgRole
+  x-authz:
+    scope: tenant
+    permission: roles:manage
+  x-ogen-operation-group: Roles
+  summary: Update a role
   requestBody:
     required: true
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/UpdateOrganizerMemberRequest.yaml
+          $ref: ../components/schemas/UpdateOrganizerRoleRequest.yaml
   responses:
     '200':
       description: Successful response.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/OrganizerMember.yaml
+            $ref: ../components/schemas/OrganizerRole.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
@@ -42,13 +41,13 @@ patch:
       $ref: ../components/responses/Default.yaml
 delete:
   tags:
-    - Organizer Members
-  operationId: removeOrgMember
-  x-ogen-operation-group: Members
-  summary: Remove a member
-  description: >-
-    Removing the last owner is refused: an organizer without an owner has nobody
-    who can manage it.
+    - Organizer Roles
+  operationId: deleteOrgRole
+  x-authz:
+    scope: tenant
+    permission: roles:manage
+  x-ogen-operation-group: Roles
+  summary: Delete a role
   responses:
     '204':
       description: Resource deleted.

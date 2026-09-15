@@ -1,6 +1,6 @@
 type: object
 properties:
-  role:
-    $ref: ./OrganizerMemberRole.yaml
+  roleId:
+    $ref: ./UUID.yaml
 required:
-  - role
+  - roleId

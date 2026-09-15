@@ -11,8 +11,7 @@ properties:
   description:
     type: string
   publicContact:
-    type: object
-    additionalProperties: true
+    $ref: ./PublicContact.yaml
 required:
   - id
   - slug

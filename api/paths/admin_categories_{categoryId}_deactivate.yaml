@@ -2,10 +2,11 @@ post:
   tags:
     - Admin Categories
   operationId: deactivateAdminCategory
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Categories
   summary: Deactivate a category
-  security:
-    - adminAuth: []
   parameters:
     - name: categoryId
       in: path

@@ -2,8 +2,16 @@ type: object
 properties:
   id:
     $ref: ./UUID.yaml
+  organizerId:
+    $ref: ./UUID.yaml
+  version:
+    $ref: ./OrganizerApplicationVersion.yaml
+  kind:
+    $ref: ./OrganizerApplicationKind.yaml
   status:
     $ref: ./OrganizerApplicationStatus.yaml
+  profile:
+    $ref: ./OrganizerProfile.yaml
   reviewNote:
     type: string
   reviewedAt:
@@ -17,7 +25,10 @@ properties:
     format: date-time
 required:
   - id
+  - version
+  - kind
   - status
+  - profile
   - reviewNote
   - createdAt
   - updatedAt

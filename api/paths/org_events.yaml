@@ -1,22 +1,24 @@
 parameters:
-  - name: organizerId
-    in: path
-    required: true
-    schema:
-      $ref: ../components/schemas/UUID.yaml
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
-    - Organizer Members
-  operationId: listOrgMembers
-  x-ogen-operation-group: Members
-  summary: List members
+    - Organizer Events
+  operationId: listOrgEvents
+  x-authz:
+    scope: tenant
+    permission: events:read
+  x-ogen-operation-group: Events
+  summary: List events
+  parameters:
+    - $ref: ../components/parameters/Page.yaml
+    - $ref: ../components/parameters/PageSize.yaml
   responses:
     '200':
       description: Successful response.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/OrganizerMemberList.yaml
+            $ref: ../components/schemas/EventList.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
@@ -29,26 +31,20 @@ get:
       $ref: ../components/responses/Default.yaml
 post:
   tags:
-    - Organizer Members
-  operationId: addOrgMember
-  x-ogen-operation-group: Members
-  summary: Add a member
-  description: >-
-    Adds an existing gotick account to the organizer, found by the email it
-    registered with. Only owners may change the member list.
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: ../components/schemas/AddOrganizerMemberRequest.yaml
+    - Organizer Events
+  operationId: createOrgEvent
+  x-authz:
+    scope: tenant
+    permission: events:create
+  x-ogen-operation-group: Events
+  summary: Create an event
   responses:
     '201':
       description: Resource created.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/OrganizerMember.yaml
+            $ref: ../components/schemas/Event.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
@@ -57,7 +53,5 @@ post:
       $ref: ../components/responses/Forbidden.yaml
     '404':
       $ref: ../components/responses/NotFound.yaml
-    '409':
-      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml

@@ -1,0 +1,34 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
+patch:
+  tags:
+    - Organizers
+  operationId: updateOrgOrganizer
+  x-authz:
+    scope: tenant
+    permission: organizer:update
+  x-ogen-operation-group: Organizers
+  summary: Update this organizer
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateOrganizerRequest.yaml
+  responses:
+    '200':
+      description: Successful response.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Organizer.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
     - Organizer Sale Phases
   operationId: listOrgSalePhases
+  x-authz:
+    scope: tenant
+    permission: sale-phases:read
   x-ogen-operation-group: SalePhases
   summary: List sale phases
   parameters:
@@ -33,6 +38,9 @@ post:
   tags:
     - Organizer Sale Phases
   operationId: createOrgSalePhase
+  x-authz:
+    scope: tenant
+    permission: sale-phases:create
   x-ogen-operation-group: SalePhases
   summary: Create a sale phase
   parameters:

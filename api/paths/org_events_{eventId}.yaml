@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
     - Organizer Events
   operationId: getOrgEvent
+  x-authz:
+    scope: tenant
+    permission: events:read
   x-ogen-operation-group: Events
   summary: Get an event
   parameters:
@@ -29,6 +34,9 @@ patch:
   tags:
     - Organizer Events
   operationId: updateOrgEvent
+  x-authz:
+    scope: tenant
+    permission: events:update
   x-ogen-operation-group: Events
   summary: Update an event
   parameters:

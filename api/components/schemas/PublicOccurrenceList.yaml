@@ -1,3 +1,11 @@
-type: array
-items:
-  $ref: ./PublicOccurrence.yaml
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: ./PublicOccurrence.yaml
+  pagination:
+    $ref: ./Pagination.yaml
+required:
+  - data
+  - pagination

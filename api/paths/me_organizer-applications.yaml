@@ -15,13 +15,15 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/MyOrganizerApplicationList.yaml
+            $ref: ../components/schemas/OrganizerApplicationList.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
     '403':
       $ref: ../components/responses/Forbidden.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml
 post:
@@ -32,18 +34,26 @@ post:
   summary: Submit an organizer application
   security:
     - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/CreateOrganizerApplicationRequest.yaml
   responses:
     '201':
       description: Resource created.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/MyOrganizerApplication.yaml
+            $ref: ../components/schemas/OrganizerApplication.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
     '403':
       $ref: ../components/responses/Forbidden.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml

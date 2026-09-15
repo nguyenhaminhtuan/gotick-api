@@ -2,10 +2,11 @@ get:
   tags:
     - Admin Categories
   operationId: getAdminCategory
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Categories
   summary: Get a category
-  security:
-    - adminAuth: []
   parameters:
     - name: categoryId
       in: path
@@ -34,10 +35,11 @@ put:
   tags:
     - Admin Categories
   operationId: updateAdminCategory
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Categories
   summary: Replace a category
-  security:
-    - adminAuth: []
   parameters:
     - name: categoryId
       in: path

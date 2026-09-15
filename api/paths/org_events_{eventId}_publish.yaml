@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 post:
   tags:
     - Organizer Events
   operationId: publishOrgEvent
+  x-authz:
+    scope: tenant
+    permission: events:publish
   x-ogen-operation-group: Events
   summary: Publish an event
   parameters:

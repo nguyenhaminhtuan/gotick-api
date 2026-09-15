@@ -1,0 +1,11 @@
+type: object
+properties:
+  version:
+    $ref: ./OrganizerApplicationVersion.yaml
+  note:
+    type: string
+    minLength: 1
+    maxLength: 1000
+required:
+  - version
+  - note

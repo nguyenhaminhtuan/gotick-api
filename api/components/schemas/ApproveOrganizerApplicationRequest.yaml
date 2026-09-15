@@ -1,0 +1,6 @@
+type: object
+properties:
+  version:
+    $ref: ./OrganizerApplicationVersion.yaml
+required:
+  - version

@@ -1,5 +1,4 @@
 type: string
 enum:
-  - pending_registration
   - active
   - suspended

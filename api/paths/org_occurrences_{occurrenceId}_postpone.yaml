@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 post:
   tags:
     - Organizer Occurrences
   operationId: postponeOrgOccurrence
+  x-authz:
+    scope: tenant
+    permission: occurrences:reschedule
   x-ogen-operation-group: Occurrences
   summary: Postpone an occurrence
   parameters:

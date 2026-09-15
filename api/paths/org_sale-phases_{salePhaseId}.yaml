@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
     - Organizer Sale Phases
   operationId: getOrgSalePhase
+  x-authz:
+    scope: tenant
+    permission: sale-phases:read
   x-ogen-operation-group: SalePhases
   summary: Get a sale phase
   parameters:
@@ -29,6 +34,9 @@ patch:
   tags:
     - Organizer Sale Phases
   operationId: updateOrgSalePhase
+  x-authz:
+    scope: tenant
+    permission: sale-phases:update
   x-ogen-operation-group: SalePhases
   summary: Update a sale phase
   parameters:

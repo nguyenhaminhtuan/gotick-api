@@ -2,10 +2,11 @@ post:
   tags:
     - Admin Organizers
   operationId: activateAdminOrganizer
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Organizers
   summary: Activate an organizer
-  security:
-    - adminAuth: []
   parameters:
     - name: organizerId
       in: path

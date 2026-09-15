@@ -1,0 +1,12 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  isOwner:
+    type: boolean
+required:
+  - id
+  - name
+  - isOwner

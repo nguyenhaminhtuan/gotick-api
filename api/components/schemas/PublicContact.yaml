@@ -1,0 +1,32 @@
+type: object
+properties:
+  website:
+    type: string
+    maxLength: 2048
+    x-ogen-validate:
+      safeURL: true
+  facebook:
+    type: string
+    maxLength: 2048
+    x-ogen-validate:
+      safeURL:
+        hosts: [facebook.com, fb.com]
+  instagram:
+    type: string
+    maxLength: 2048
+    x-ogen-validate:
+      safeURL:
+        hosts: [instagram.com]
+  tiktok:
+    type: string
+    maxLength: 2048
+    x-ogen-validate:
+      safeURL:
+        hosts: [tiktok.com]
+  youtube:
+    type: string
+    maxLength: 2048
+    x-ogen-validate:
+      safeURL:
+        hosts: [youtube.com]
+additionalProperties: false

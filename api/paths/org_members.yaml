@@ -1,51 +1,61 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
-    - My Profile
-  operationId: getMyProfile
-  x-ogen-operation-group: Profile
-  summary: Get my profile
-  security:
-    - bearerAuth: []
+    - Organizer Members
+  operationId: listOrgMembers
+  x-authz:
+    scope: tenant
+    permission: members:read
+  x-ogen-operation-group: Members
+  summary: List members
   responses:
     '200':
       description: Successful response.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/MyProfile.yaml
-    '401':
-      $ref: ../components/responses/Unauthorized.yaml
-    '403':
-      $ref: ../components/responses/Forbidden.yaml
-    default:
-      $ref: ../components/responses/Default.yaml
-post:
-  tags:
-    - My Profile
-  operationId: createMyProfile
-  x-ogen-operation-group: Profile
-  summary: Create my profile
-  security:
-    - bearerAuth: []
-  requestBody:
-    required: true
-    content:
-      application/json:
-        schema:
-          $ref: ../components/schemas/CreateMyProfileRequest.yaml
-  responses:
-    '201':
-      description: Resource created.
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/MyProfile.yaml
+            $ref: ../components/schemas/OrganizerMemberList.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
     '403':
       $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+post:
+  tags:
+    - Organizer Members
+  operationId: addOrgMember
+  x-authz:
+    scope: tenant
+    permission: members:manage
+  x-ogen-operation-group: Members
+  summary: Add a member
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/AddOrganizerMemberRequest.yaml
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/OrganizerMember.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '404':
+      $ref: ../components/responses/NotFound.yaml
     '409':
       $ref: ../components/responses/Conflict.yaml
     default:

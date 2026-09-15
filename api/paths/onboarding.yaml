@@ -1,0 +1,31 @@
+post:
+  tags:
+    - Onboarding
+  operationId: onboard
+  x-ogen-operation-group: Onboarding
+  summary: Complete onboarding
+  security:
+    - bearerAuth: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/OnboardingRequest.yaml
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/MyProfile.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
+    default:
+      $ref: ../components/responses/Default.yaml

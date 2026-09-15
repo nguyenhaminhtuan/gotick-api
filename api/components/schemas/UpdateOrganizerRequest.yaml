@@ -1,0 +1,7 @@
+type: object
+properties:
+  description:
+    type: string
+    maxLength: 2000
+  publicContact:
+    $ref: ./PublicContact.yaml
