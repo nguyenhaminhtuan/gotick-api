@@ -3,9 +3,13 @@ apis:
   api@v1:
     root: api/openapi.yaml
     output: api/dist/openapi.yaml
+plugins:
+  - ./api/plugins/authz.js
 extends:
   - recommended
 rules:
   info-license: off
   no-server-example.com: off
   no-unused-components: error
+  authz/x-authz-required: error
+  authz/x-authz-permission-used: error

@@ -2,10 +2,11 @@ get:
   tags:
     - Admin Cities
   operationId: getAdminCity
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Cities
   summary: Get a city
-  security:
-    - adminAuth: []
   parameters:
     - name: cityCode
       in: path
@@ -31,10 +32,11 @@ patch:
   tags:
     - Admin Cities
   operationId: updateAdminCity
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Cities
   summary: Update a city
-  security:
-    - adminAuth: []
   parameters:
     - name: cityCode
       in: path

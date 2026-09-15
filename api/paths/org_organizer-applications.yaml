@@ -1,0 +1,34 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
+post:
+  tags:
+    - Organizer Applications
+  operationId: createOrgOrganizerApplication
+  x-authz:
+    scope: tenant
+    permission: organizer:propose
+  x-ogen-operation-group: OrganizerApplications
+  summary: Propose a change to this organizer
+  responses:
+    '201':
+      description: Resource created.
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/OrganizerApplication.yaml
+    '400':
+      $ref: ../components/responses/BadRequest.yaml
+    '401':
+      $ref: ../components/responses/Unauthorized.yaml
+    '403':
+      $ref: ../components/responses/Forbidden.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
+    default:
+      $ref: ../components/responses/Default.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/ProposeOrganizerChangeRequest.yaml

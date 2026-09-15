@@ -1,0 +1,23 @@
+type: object
+properties:
+  page:
+    type: integer
+    format: int32
+    minimum: 1
+  pageSize:
+    type: integer
+    format: int32
+    minimum: 1
+  total:
+    type: integer
+    format: int64
+    minimum: 0
+  totalPages:
+    type: integer
+    format: int32
+    minimum: 0
+required:
+  - page
+  - pageSize
+  - total
+  - totalPages

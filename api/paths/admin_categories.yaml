@@ -2,10 +2,11 @@ get:
   tags:
     - Admin Categories
   operationId: listAdminCategories
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Categories
   summary: List categories
-  security:
-    - adminAuth: []
   responses:
     '200':
       description: Successful response.
@@ -23,10 +24,11 @@ post:
   tags:
     - Admin Categories
   operationId: createAdminCategory
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Categories
   summary: Create a category
-  security:
-    - adminAuth: []
   requestBody:
     required: true
     content:

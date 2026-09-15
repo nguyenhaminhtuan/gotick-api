@@ -1,25 +1,32 @@
 parameters:
-  - name: organizerId
+  - $ref: ../components/parameters/TenantID.yaml
+  - name: userId
     in: path
     required: true
     schema:
       $ref: ../components/schemas/UUID.yaml
-get:
+patch:
   tags:
-    - Organizer Events
-  operationId: listOrgEvents
-  x-ogen-operation-group: Events
-  summary: List events
-  parameters:
-    - $ref: ../components/parameters/Page.yaml
-    - $ref: ../components/parameters/PageSize.yaml
+    - Organizer Members
+  operationId: updateOrgMember
+  x-authz:
+    scope: tenant
+    permission: members:manage
+  x-ogen-operation-group: Members
+  summary: Change a member's role
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateOrganizerMemberRequest.yaml
   responses:
     '200':
       description: Successful response.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/EventList.yaml
+            $ref: ../components/schemas/OrganizerMember.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
@@ -28,21 +35,22 @@ get:
       $ref: ../components/responses/Forbidden.yaml
     '404':
       $ref: ../components/responses/NotFound.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml
-post:
+delete:
   tags:
-    - Organizer Events
-  operationId: createOrgEvent
-  x-ogen-operation-group: Events
-  summary: Create an event
+    - Organizer Members
+  operationId: removeOrgMember
+  x-authz:
+    scope: tenant
+    permission: members:manage
+  x-ogen-operation-group: Members
+  summary: Remove a member
   responses:
-    '201':
-      description: Resource created.
-      content:
-        application/json:
-          schema:
-            $ref: ../components/schemas/Event.yaml
+    '204':
+      description: Resource deleted.
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':
@@ -51,5 +59,7 @@ post:
       $ref: ../components/responses/Forbidden.yaml
     '404':
       $ref: ../components/responses/NotFound.yaml
+    '409':
+      $ref: ../components/responses/Conflict.yaml
     default:
       $ref: ../components/responses/Default.yaml

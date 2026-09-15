@@ -1,0 +1,11 @@
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: ./User.yaml
+  pagination:
+    $ref: ./Pagination.yaml
+required:
+  - data
+  - pagination

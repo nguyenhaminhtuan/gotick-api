@@ -3,8 +3,8 @@ properties:
   email:
     type: string
     format: email
-  role:
-    $ref: ./OrganizerMemberRole.yaml
+  roleId:
+    $ref: ./UUID.yaml
 required:
   - email
-  - role
+  - roleId

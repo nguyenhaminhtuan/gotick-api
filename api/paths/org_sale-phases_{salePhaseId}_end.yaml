@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 post:
   tags:
     - Organizer Sale Phases
   operationId: endOrgSalePhase
+  x-authz:
+    scope: tenant
+    permission: sale-phases:operate
   x-ogen-operation-group: SalePhases
   summary: End a sale phase
   parameters:

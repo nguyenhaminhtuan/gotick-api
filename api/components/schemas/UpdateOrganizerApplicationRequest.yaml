@@ -1,0 +1,21 @@
+type: object
+properties:
+  version:
+    $ref: ./OrganizerApplicationVersion.yaml
+  name:
+    type: string
+    minLength: 1
+    maxLength: 120
+  organizerType:
+    $ref: ./OrganizerType.yaml
+  logo:
+    type: string
+  email:
+    type: string
+    format: email
+  phone:
+    type: string
+    minLength: 1
+    maxLength: 20
+required:
+  - version

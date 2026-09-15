@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
     - Organizer Occurrences
   operationId: listOrgOccurrences
+  x-authz:
+    scope: tenant
+    permission: occurrences:read
   x-ogen-operation-group: Occurrences
   summary: List occurrences
   parameters:
@@ -33,6 +38,9 @@ post:
   tags:
     - Organizer Occurrences
   operationId: createOrgOccurrence
+  x-authz:
+    scope: tenant
+    permission: occurrences:create
   x-ogen-operation-group: Occurrences
   summary: Create an occurrence
   parameters:

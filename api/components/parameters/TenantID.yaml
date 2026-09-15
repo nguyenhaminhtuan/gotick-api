@@ -1,0 +1,5 @@
+name: X-Tenant-ID
+in: header
+required: true
+schema:
+  $ref: ../schemas/UUID.yaml

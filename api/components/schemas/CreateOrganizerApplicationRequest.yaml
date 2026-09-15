@@ -1,0 +1,29 @@
+type: object
+properties:
+  name:
+    type: string
+    minLength: 1
+    maxLength: 120
+  description:
+    type: string
+    maxLength: 2000
+  organizerType:
+    $ref: ./OrganizerType.yaml
+  logo:
+    type: string
+  email:
+    type: string
+    format: email
+  phone:
+    type: string
+    minLength: 1
+    maxLength: 20
+  publicContact:
+    $ref: ./PublicContact.yaml
+required:
+  - name
+  - description
+  - organizerType
+  - logo
+  - email
+  - phone

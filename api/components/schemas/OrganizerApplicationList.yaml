@@ -1,3 +1,11 @@
-type: array
-items:
-  $ref: ./OrganizerApplication.yaml
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: ./OrganizerApplication.yaml
+  pagination:
+    $ref: ./Pagination.yaml
+required:
+  - data
+  - pagination

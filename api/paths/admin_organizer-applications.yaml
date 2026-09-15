@@ -2,10 +2,11 @@ get:
   tags:
     - Admin Organizer Applications
   operationId: listAdminOrganizerApplications
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: OrganizerApplications
   summary: List organizer applications
-  security:
-    - adminAuth: []
   parameters:
     - $ref: ../components/parameters/Page.yaml
     - $ref: ../components/parameters/PageSize.yaml

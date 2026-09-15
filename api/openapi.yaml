@@ -33,20 +33,27 @@ tags:
   - name: Public Categories
     x-displayName: Categories
     description: Reference list of categories events are classified under.
-
+  - name: Onboarding
+    x-displayName: Onboarding
+    description: Turning a verified identity into a gotick user.
   - name: My Profile
     x-displayName: Profile
-    description: The authenticated account's own profile.
+    description: The authenticated user's own profile.
   - name: My Tickets
     x-displayName: Tickets
-    description: Tickets owned by the authenticated account.
+    description: Tickets owned by the authenticated user.
   - name: My Orders
     x-displayName: Orders
-    description: Orders placed by the authenticated account.
+    description: Orders placed by the authenticated user.
   - name: My Organizer Applications
     x-displayName: Organizer Applications
-    description: The authenticated account's requests to become an organizer.
-
+    description: The authenticated user's requests to become an organizer.
+  - name: My Organizers
+    x-displayName: Organizers
+    description: The organizers the authenticated user can act for.
+  - name: Organizer Roles
+    x-displayName: Roles
+    description: Roles an organizer defines, and the permissions each grants.
   - name: Organizer Members
     x-displayName: Members
     description: People who can act on behalf of an organizer.
@@ -62,16 +69,15 @@ tags:
   - name: Organizer Sale Phases
     x-displayName: Sale Phases
     description: Selling windows and their lifecycle transitions.
-
-  - name: Admin Staff
-    x-displayName: Staff
-    description: Accounts allowed to operate the platform.
+  - name: Admin Users
+    x-displayName: Users
+    description: Everyone registered on the platform, and the role each holds.
   - name: Admin Organizer Applications
     x-displayName: Organizer Applications
-    description: Review queue for accounts applying to become organizers.
+    description: Review queue for users applying to become organizers.
   - name: Admin Organizers
     x-displayName: Organizers
-    description: Oversight of organizer accounts on the platform.
+    description: Oversight of the organizers on the platform.
   - name: Admin Cities
     x-displayName: Cities
     description: Maintenance of the city reference data.
@@ -88,14 +94,19 @@ x-tagGroups:
       - Public Organizers
       - Public Cities
       - Public Categories
+  - name: Onboarding
+    tags:
+      - Onboarding
   - name: Me
     tags:
       - My Profile
       - My Tickets
       - My Orders
       - My Organizer Applications
+      - My Organizers
   - name: Organizer
     tags:
+      - Organizer Roles
       - Organizer Members
       - Organizer Events
       - Organizer Occurrences
@@ -103,7 +114,7 @@ x-tagGroups:
       - Organizer Sale Phases
   - name: Admin
     tags:
-      - Admin Staff
+      - Admin Users
       - Admin Organizer Applications
       - Admin Organizers
       - Admin Cities
@@ -114,11 +125,10 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
-    adminAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
 paths:
+  # Onboarding
+  /onboarding:
+    $ref: ./paths/onboarding.yaml
   # Public
   /public/cities:
     $ref: ./paths/public_cities.yaml
@@ -144,9 +154,11 @@ paths:
     $ref: ./paths/public_occurrences_{occurrenceId}_ticket-categories.yaml
   /public/occurrences/{occurrenceId}/sale-phases:
     $ref: ./paths/public_occurrences_{occurrenceId}_sale-phases.yaml
-  # Me (authenticated account)
-  /me/profile:
-    $ref: ./paths/me_profile.yaml
+  # Me (authenticated user)
+  /me:
+    $ref: ./paths/me.yaml
+  /me/organizers:
+    $ref: ./paths/me_organizers.yaml
   /me/tickets:
     $ref: ./paths/me_tickets.yaml
   /me/tickets/{ticketId}:
@@ -162,12 +174,20 @@ paths:
   /me/organizer-applications/{organizerApplicationId}/resubmit:
     $ref: ./paths/me_organizer-applications_{organizerApplicationId}_resubmit.yaml
   # Organizer
-  /org/organizers/{organizerId}/members:
-    $ref: ./paths/org_organizers_{organizerId}_members.yaml
-  /org/organizers/{organizerId}/members/{accountId}:
-    $ref: ./paths/org_organizers_{organizerId}_members_{accountId}.yaml
-  /org/organizers/{organizerId}/events:
-    $ref: ./paths/org_organizers_{organizerId}_events.yaml
+  /org/organizer:
+    $ref: ./paths/org_organizer.yaml
+  /org/organizer-applications:
+    $ref: ./paths/org_organizer-applications.yaml
+  /org/roles:
+    $ref: ./paths/org_roles.yaml
+  /org/roles/{roleId}:
+    $ref: ./paths/org_roles_{roleId}.yaml
+  /org/members:
+    $ref: ./paths/org_members.yaml
+  /org/members/{userId}:
+    $ref: ./paths/org_members_{userId}.yaml
+  /org/events:
+    $ref: ./paths/org_events.yaml
   /org/events/{eventId}:
     $ref: ./paths/org_events_{eventId}.yaml
   /org/events/{eventId}/publish:
@@ -201,8 +221,8 @@ paths:
   /org/sale-phases/{salePhaseId}/cancel:
     $ref: ./paths/org_sale-phases_{salePhaseId}_cancel.yaml
   # Admin
-  /admin/staff:
-    $ref: ./paths/admin_staff.yaml
+  /admin/users:
+    $ref: ./paths/admin_users.yaml
   /admin/organizer-applications:
     $ref: ./paths/admin_organizer-applications.yaml
   /admin/organizer-applications/{organizerApplicationId}/approve:

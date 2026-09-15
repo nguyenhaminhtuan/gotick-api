@@ -18,7 +18,7 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/MyOrganizerApplication.yaml
+            $ref: ../components/schemas/OrganizerApplication.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
     '403':

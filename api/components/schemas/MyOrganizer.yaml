@@ -1,0 +1,18 @@
+type: object
+properties:
+  id:
+    $ref: ./UUID.yaml
+  name:
+    type: string
+  logo:
+    type: string
+  status:
+    $ref: ./OrganizerStatus.yaml
+  role:
+    $ref: ./OrganizerRoleRef.yaml
+required:
+  - id
+  - name
+  - logo
+  - status
+  - role

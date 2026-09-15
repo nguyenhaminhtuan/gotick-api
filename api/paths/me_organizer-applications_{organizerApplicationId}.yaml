@@ -18,7 +18,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/MyOrganizerApplication.yaml
+            $ref: ../components/schemas/OrganizerApplication.yaml
     '401':
       $ref: ../components/responses/Unauthorized.yaml
     '403':
@@ -41,13 +41,19 @@ patch:
       required: true
       schema:
         $ref: ../components/schemas/UUID.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/UpdateOrganizerApplicationRequest.yaml
   responses:
     '200':
       description: Successful response.
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/MyOrganizerApplication.yaml
+            $ref: ../components/schemas/OrganizerApplication.yaml
     '400':
       $ref: ../components/responses/BadRequest.yaml
     '401':

@@ -2,16 +2,23 @@ post:
   tags:
     - Admin Organizer Applications
   operationId: requestChangesAdminOrganizerApplication
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: OrganizerApplications
   summary: Request changes on an organizer application
-  security:
-    - adminAuth: []
   parameters:
     - name: organizerApplicationId
       in: path
       required: true
       schema:
         $ref: ../components/schemas/UUID.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/ReviewOrganizerApplicationRequest.yaml
   responses:
     '200':
       description: Successful response.

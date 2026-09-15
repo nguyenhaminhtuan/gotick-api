@@ -2,15 +2,20 @@ type: object
 properties:
   id:
     $ref: ./UUID.yaml
-  status:
-    $ref: ./OrganizerApplicationStatus.yaml
-  reviewNote:
+  fullName:
     type: string
-  reviewedAt:
+  email:
+    type: string
+    format: email
+  avatar:
+    type: string
+  role:
+    $ref: ./UserRole.yaml
+  status:
+    $ref: ./UserStatus.yaml
+  suspendedAt:
     type: string
     format: date-time
-  organizer:
-    $ref: ./Organizer.yaml
   createdAt:
     type: string
     format: date-time
@@ -19,8 +24,10 @@ properties:
     format: date-time
 required:
   - id
+  - fullName
+  - email
+  - avatar
+  - role
   - status
-  - reviewNote
-  - organizer
   - createdAt
   - updatedAt

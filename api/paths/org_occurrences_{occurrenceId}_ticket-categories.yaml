@@ -1,7 +1,12 @@
+parameters:
+  - $ref: ../components/parameters/TenantID.yaml
 get:
   tags:
     - Organizer Ticket Categories
   operationId: listOrgTicketCategories
+  x-authz:
+    scope: tenant
+    permission: ticket-categories:read
   x-ogen-operation-group: TicketCategories
   summary: List ticket categories
   parameters:
@@ -33,6 +38,9 @@ post:
   tags:
     - Organizer Ticket Categories
   operationId: createOrgTicketCategory
+  x-authz:
+    scope: tenant
+    permission: ticket-categories:create
   x-ogen-operation-group: TicketCategories
   summary: Create a ticket category
   parameters:

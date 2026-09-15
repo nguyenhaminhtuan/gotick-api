@@ -1,3 +1,11 @@
-type: array
-items:
-  $ref: ./SalePhase.yaml
+type: object
+properties:
+  data:
+    type: array
+    items:
+      $ref: ./SalePhase.yaml
+  pagination:
+    $ref: ./Pagination.yaml
+required:
+  - data
+  - pagination

@@ -2,10 +2,11 @@ post:
   tags:
     - Admin Organizers
   operationId: suspendAdminOrganizer
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Organizers
   summary: Suspend an organizer
-  security:
-    - adminAuth: []
   parameters:
     - name: organizerId
       in: path

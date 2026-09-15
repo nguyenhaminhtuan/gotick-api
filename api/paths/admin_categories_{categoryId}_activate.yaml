@@ -2,10 +2,11 @@ post:
   tags:
     - Admin Categories
   operationId: activateAdminCategory
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Categories
   summary: Activate a category
-  security:
-    - adminAuth: []
   parameters:
     - name: categoryId
       in: path

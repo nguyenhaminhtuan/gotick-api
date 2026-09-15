@@ -2,10 +2,11 @@ get:
   tags:
     - Admin Cities
   operationId: listAdminCities
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Cities
   summary: List cities
-  security:
-    - adminAuth: []
   responses:
     '200':
       description: Successful response.
@@ -23,10 +24,11 @@ post:
   tags:
     - Admin Cities
   operationId: createAdminCity
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Cities
   summary: Create a city
-  security:
-    - adminAuth: []
   responses:
     '201':
       description: Resource created.

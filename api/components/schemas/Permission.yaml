@@ -1,0 +1,26 @@
+type: string
+enum:
+  - organizer:update
+  - organizer:propose
+  - events:read
+  - events:create
+  - events:update
+  - events:publish
+  - events:close
+  - occurrences:read
+  - occurrences:create
+  - occurrences:update
+  - occurrences:reschedule
+  - occurrences:cancel
+  - ticket-categories:read
+  - ticket-categories:create
+  - ticket-categories:update
+  - sale-phases:read
+  - sale-phases:create
+  - sale-phases:update
+  - sale-phases:operate
+  - sale-phases:cancel
+  - members:read
+  - members:manage
+  - roles:read
+  - roles:manage

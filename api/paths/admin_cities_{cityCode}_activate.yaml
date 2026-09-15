@@ -2,10 +2,11 @@ post:
   tags:
     - Admin Cities
   operationId: activateAdminCity
+  x-authz:
+    scope: platform
+    roles: [admin]
   x-ogen-operation-group: Cities
   summary: Activate a city
-  security:
-    - adminAuth: []
   parameters:
     - name: cityCode
       in: path

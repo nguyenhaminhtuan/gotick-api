@@ -16,8 +16,7 @@ properties:
   phone:
     type: string
   publicContact:
-    type: object
-    additionalProperties: true
+    $ref: ./PublicContact.yaml
   status:
     $ref: ./OrganizerStatus.yaml
   activatedAt:
